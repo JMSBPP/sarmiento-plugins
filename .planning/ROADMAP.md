@@ -13,7 +13,7 @@ v1 lays the foundation only: a buildable, CI-verified Haskell Stack project wire
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Scaffold** - Fresh clone builds and tests on the pinned snapshot with baseline project structure (completed 2026-08-25)
-- [ ] **Phase 2: Dependency Wiring** - The three pinned upstream git extra-deps resolve and are provably importable
+- [x] **Phase 2: Dependency Wiring** - The three pinned upstream git extra-deps resolve and are provably importable (completed 2026-08-25)
 - [ ] **Phase 3: CI** - Every push/PR is automatically build-and-test verified, including private-repo auth, with a green run on `main`
 
 ## Phase Details
@@ -70,5 +70,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffold | 2/2 | Complete    | 2026-08-25 |
-| 2. Dependency Wiring | 1/2 | In Progress|  |
+| 2. Dependency Wiring | 2/2 | Complete   | 2026-08-25 |
 | 3. CI | 0/TBD | Not started | - |

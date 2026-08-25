@@ -18,7 +18,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **DEPS-01**: `stack.yaml` declares git extra-deps pinned by commit for `JMSBPP/mamertomics-etl` (private) and `d2p-finance/haskell-deepseek-plugin-sdk` (public); `stack.yaml.lock` committed
 - [x] **DEPS-02**: `stack.yaml` declares `JMSBPP/kalecky-semantics` (now a plain Stack project) as a pinned git extra-dep, and `package.yaml` depends on `kalecky-semantics` so `Kalecky.Types.*` are importable — no local dimensional types are defined
-- [ ] **DEPS-03**: Each extra-dep's role and the "bump deliberately, never track a branch" rule are documented in README (dependency table with owner, visibility, pinned commit, why)
+- [x] **DEPS-03**: Each extra-dep's role and the "bump deliberately, never track a branch" rule are documented in README (dependency table with owner, visibility, pinned commit, why)
 - [x] **DEPS-04**: A compile-time proof that all three deps resolve: a module importing at least one symbol from each (or, for stubs with no library, a documented note that the dep is executable-only until upstream exposes a library — the build must still succeed)
 
 ### CI
@@ -85,7 +85,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SCAF-04 | Phase 1 | Complete |
 | DEPS-01 | Phase 2 | Complete |
 | DEPS-02 | Phase 2 | Complete |
-| DEPS-03 | Phase 2 | Pending |
+| DEPS-03 | Phase 2 | Complete |
 | DEPS-04 | Phase 2 | Complete |
 | CI-01 | Phase 3 | Pending |
 | CI-02 | Phase 3 | Pending |
