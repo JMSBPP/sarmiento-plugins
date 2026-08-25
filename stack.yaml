@@ -10,7 +10,35 @@ snapshot:
 packages:
 - .
 
-# Git extra-deps (mamertomics-etl, haskell-deepseek-plugin-sdk, kalecky-semantics) are
-# added in Phase 2 — Dependency Wiring. Deliberately empty here so the scaffold builds
-# with no network access beyond the snapshot itself.
-extra-deps: []
+# Upstream dependencies, each pinned to an explicit commit — never a branch.
+#
+# Why a commit and never a branch: with a branch reference the real pin silently becomes
+# the `pantry-tree` content hash Stack writes into stack.yaml.lock, so the human-readable
+# reference in this file stops describing what actually gets built. Bumping is a deliberate
+# edit here plus a `stack build` that rewrites the lock, committed together. The bump
+# procedure is written down in README.md.
+#
+# HTTPS URLs (not git@github.com:...) are used on purpose: this is the form Phase 3's CI
+# rewrites with `git config url."https://x-access-token:${TOKEN}@github.com/".insteadOf`
+# to fetch the one private repo. An SSH form would need a second, CI-incompatible pin.
+extra-deps:
+# Sole source of dimensional, unit, currency and price types. Public repo, zero non-base
+# dependencies, so depending on it pulls nothing else into the build plan.
+- git: https://github.com/JMSBPP/kalecky-semantics.git
+  commit: cd6778e2d39c5eb30549d8ff87459b5644cc18fc
+
+# Owns mamertomics-db, the Supabase staging schema this plugin will read. Private repo:
+# fetched locally through the existing `gh auth git-credential` helper, and in CI through
+# a scoped token (Phase 3, CI-02).
+- git: https://github.com/JMSBPP/mamertomics-etl.git
+  commit: c8b45ac159553017df82c4258af3d2bf68b5f62e
+
+# DeepSeek Harness (Cordis) plugin SDK. Declared here and NOWHERE in package.yaml: at this
+# commit the package's `library` stanza exists but every exposed module has an empty export
+# list (`module DeepSeek.Plugin.* () where` — each is a stub the SDK's own upstream phases
+# fill in later), so there is still no importable symbol; a `dependencies:` entry would add
+# a real build edge with nothing to compile-check against it. Stack still clones it and
+# records its pantry-tree hash in stack.yaml.lock, which is what pins it; it is simply never
+# compiled here. Revisit once upstream's library modules gain real exports.
+- git: https://github.com/d2p-finance/haskell-deepseek-plugin-sdk.git
+  commit: 242ebfa05acd318326aea7f35508d7d4c1bbdbfa

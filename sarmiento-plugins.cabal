@@ -36,6 +36,8 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , kalecky-semantics
+    , mamertomics-etl
   default-language: Haskell2010
 
 test-suite sarmiento-plugins-test
@@ -51,6 +53,8 @@ test-suite sarmiento-plugins-test
   build-depends:
       QuickCheck
     , base >=4.7 && <5
+    , kalecky-semantics
+    , mamertomics-etl
     , sarmiento-plugins
     , tasty
     , tasty-quickcheck

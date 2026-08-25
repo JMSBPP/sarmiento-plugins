@@ -17,6 +17,17 @@ description:         Please see the README on GitHub at <https://github.com/JMSB
 
 dependencies:
 - base >= 4.7 && < 5
+# The project's ONLY source of dimensional and unit types (DEPS-02). No local dimensional
+# system is defined anywhere in this repository; scripts/check-no-local-dimensional-types.sh
+# enforces that.
+- kalecky-semantics
+# Read side of mamertomics-db. Its real read API is v2; today the package exposes only the
+# `Lib` scaffold module, which is enough to prove the dependency edge resolves and compiles.
+- mamertomics-etl
+# haskell-deepseek-plugin-sdk is deliberately ABSENT from this list. Its pinned commit now
+# declares a `library` stanza, but every exposed module has an empty export list, so there is
+# no symbol to import or compile-check against; adding it here would add a real build edge to
+# nothing. It is pinned in stack.yaml extra-deps only. See README.md for the note.
 
 # Warning set is byte-for-byte the same as JMSBPP/mamertomics-etl, so a module can move
 # between the two repositories without a warning-flag surprise. Warnings do not fail the

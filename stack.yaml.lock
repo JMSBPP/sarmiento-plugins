@@ -3,7 +3,40 @@
 # For more information, please see the documentation at:
 #   https://docs.haskellstack.org/en/stable/topics/lock_files
 
-packages: []
+packages:
+- completed:
+    commit: cd6778e2d39c5eb30549d8ff87459b5644cc18fc
+    git: https://github.com/JMSBPP/kalecky-semantics.git
+    name: kalecky-semantics
+    pantry-tree:
+      sha256: ebd89750a88ff66423b5c645ec19dd7b6d1c456f28e72443a864b2ed78bef972
+      size: 9795
+    version: 1.0.0
+  original:
+    commit: cd6778e2d39c5eb30549d8ff87459b5644cc18fc
+    git: https://github.com/JMSBPP/kalecky-semantics.git
+- completed:
+    commit: c8b45ac159553017df82c4258af3d2bf68b5f62e
+    git: https://github.com/JMSBPP/mamertomics-etl.git
+    name: mamertomics-etl
+    pantry-tree:
+      sha256: 4864fecac2db7e2869ee69b66c3c0d56bac04a0c71c1c496775b599a85e33337
+      size: 1501
+    version: 0.1.0.0
+  original:
+    commit: c8b45ac159553017df82c4258af3d2bf68b5f62e
+    git: https://github.com/JMSBPP/mamertomics-etl.git
+- completed:
+    commit: 242ebfa05acd318326aea7f35508d7d4c1bbdbfa
+    git: https://github.com/d2p-finance/haskell-deepseek-plugin-sdk.git
+    name: haskell-deepseek-plugin-sdk
+    pantry-tree:
+      sha256: 7292a4acd3e6a5d87ff72a4c3bd730a133674b27ef9433e989645f09e1d2d9f6
+      size: 7423
+    version: 0.1.0.0
+  original:
+    commit: 242ebfa05acd318326aea7f35508d7d4c1bbdbfa
+    git: https://github.com/d2p-finance/haskell-deepseek-plugin-sdk.git
 snapshots:
 - completed:
     sha256: 121a2b65e6842f67819409330694d068e6276f64df87faaf2a66c0016ddf277b
