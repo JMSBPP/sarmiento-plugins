@@ -42,10 +42,11 @@ Plans:
   2. `stack.yaml` declares `JMSBPP/kalecky-semantics` as a pinned git extra-dep and `package.yaml` depends on it so `Kalecky.Types.*` are importable — no local dimensional types are defined anywhere in the project
   3. README documents each dependency's role in a table (owner, visibility, pinned commit, why), stating the "bump deliberately, never track a branch" rule
   4. A module compiles importing at least one symbol from each of the three deps — or, for a dep with no library surface yet, a documented note explains it is executable-only until upstream exposes one; either way `stack build` succeeds end to end
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — Pin the three upstream git extra-deps by commit, depend on the two that expose a library, and prove the wiring with a compile-time import module plus a no-local-dimensional-types guard — DEPS-01, DEPS-02, DEPS-04
+- [ ] 02-02-PLAN.md — Document the dependency contract in README (owner, visibility, pinned commit, why), the never-track-a-branch rule and bump procedure, and the SDK's executable-only note; record it in CHANGELOG — DEPS-03, DEPS-04
 
 ### Phase 3: CI
 **Goal**: Every push and pull request to the private GitHub repo is automatically verified by build + test, including fetching the private extra-dep via a scoped token, with a green run observable on `main`.
@@ -69,5 +70,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffold | 2/2 | Complete    | 2026-08-25 |
-| 2. Dependency Wiring | 0/TBD | Not started | - |
+| 2. Dependency Wiring | 0/2 | Not started | - |
 | 3. CI | 0/TBD | Not started | - |
