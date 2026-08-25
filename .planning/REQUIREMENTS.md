@@ -79,24 +79,24 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCAF-01 | — | Pending |
-| SCAF-02 | — | Pending |
-| SCAF-03 | — | Pending |
-| SCAF-04 | — | Pending |
-| DEPS-01 | — | Pending |
-| DEPS-02 | — | Pending |
-| DEPS-03 | — | Pending |
-| DEPS-04 | — | Pending |
-| CI-01 | — | Pending |
-| CI-02 | — | Pending |
-| CI-03 | — | Pending |
-| CI-04 | — | Pending |
+| SCAF-01 | Phase 1 | Pending |
+| SCAF-02 | Phase 1 | Pending |
+| SCAF-03 | Phase 1 | Pending |
+| SCAF-04 | Phase 1 | Pending |
+| DEPS-01 | Phase 2 | Pending |
+| DEPS-02 | Phase 2 | Pending |
+| DEPS-03 | Phase 2 | Pending |
+| DEPS-04 | Phase 2 | Pending |
+| CI-01 | Phase 3 | Pending |
+| CI-02 | Phase 3 | Pending |
+| CI-03 | Phase 3 | Pending |
+| CI-04 | Phase 3 | Pending |
 
 **Coverage:**
 - v1 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-08-25*
-*Last updated: 2026-08-25 after initial definition*
+*Last updated: 2026-08-25 after roadmap creation (3 phases: Scaffold, Dependency Wiring, CI)*
