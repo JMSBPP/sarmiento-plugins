@@ -1,3 +1,19 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: milestone
+status: executing
+stopped_at: Completed 01-scaffold-01-PLAN.md
+last_updated: "2026-08-25T19:32:02.364Z"
+last_activity: 2026-08-25 — 01-01 (repository hygiene and human-facing docs) complete
+progress:
+  total_phases: 3
+  completed_phases: 0
+  total_plans: 2
+  completed_plans: 1
+  percent: 50
+---
+
 # Project State
 
 ## Project Reference
@@ -10,30 +26,34 @@ See: .planning/PROJECT.md (updated 2026-08-25)
 ## Current Position
 
 Phase: 1 of 3 (Scaffold)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-08-25 — ROADMAP.md created, 12/12 v1 requirements mapped
+Plan: 1 of 2 in current phase
+Status: In progress
+Last activity: 2026-08-25 — 01-01 (repository hygiene and human-facing docs) complete
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [█████░░░░░] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: - min
-- Total execution time: 0 hours
+- Total plans completed: 1
+- Average duration: 3 min
+- Total execution time: 0.05 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-scaffold | 1 | 3 min | 3 min |
 
 **Recent Trend:**
-- Last 5 plans: none yet
+- Last 5 plans: 01-01 (3 min)
 - Trend: -
 
 *Updated after each plan completion*
+
+| Plan | Duration (min) | Tasks | Files |
+|------|-----------------|-------|-------|
+| Phase 01-scaffold P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -44,6 +64,8 @@ Recent decisions affecting current work:
 
 - Roadmap: v1 scope is scaffold + dependency wiring + CI only (3 phases); protocol, claim/shock formats, data grounding, and formalization are all v2, gated on upstreams (`haskell-deepseek-plugin-sdk`, `mamertomics-etl`, `kalecky-semantics` KaleckianKernel) exposing real APIs
 - Roadmap: `kalecky-semantics` corrected from research's "trapped in a Cabal sublibrary" blocker to a plain Stack project as of commit `cd6778e` — pinned as a normal git extra-dep in Phase 2, no vendoring workaround needed
+- 01-01: `stack.yaml.lock` and `sarmiento-plugins.cabal` deliberately kept trackable (not gitignored) — verified live with `git check-ignore`
+- 01-01: README states scaffold-only status plainly, marks all three upstreams unwired until Phase 2, avoiding present-tense description of unbuilt behaviour
 
 ### Pending Todos
 
@@ -56,6 +78,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-08-25
-Stopped at: ROADMAP.md and STATE.md created after requirements definition; awaiting roadmap approval
+Last session: 2026-08-25T19:32:02.362Z
+Stopped at: Completed 01-scaffold-01-PLAN.md
 Resume file: None
