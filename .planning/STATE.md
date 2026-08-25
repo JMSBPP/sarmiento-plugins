@@ -1,7 +1,7 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
+milestone: v1.1
+milestone_name: Education Claim
 status: planning
 stopped_at: Completed 02-dependency-wiring-02-PLAN.md — Phase 2 (Dependency Wiring) complete, 2/2 plans
 last_updated: "2026-08-25T21:15:02.671Z"
@@ -21,16 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-08-25)
 
 **Core value:** A Sarmiento claim goes in, a dimensionally-typed Kaleckian shock grounded in real `mamertomics-db` data comes out — through the harness plugin protocol, with every number carrying provenance and units. (v1 lays the foundation: a buildable, CI-verified Stack project wired to its upstreams.)
-**Current focus:** Phase 2 - Dependency Wiring complete (2 of 2 plans); Phase 3 (CI) not yet planned
+**Current focus:** Milestone v1.1 Education Claim — defining requirements
 
 ## Current Position
 
-Phase: 2 of 3 (Dependency Wiring) — complete
-Plan: 2 of 2 in current phase
-Status: Phase 2 complete — Phase 3 (CI) planning is next
-Last activity: 2026-08-25 — 02-02 (README dependency table, discipline, bump procedure; CHANGELOG; Phase 2 exit gate) complete
-
-Progress: [██████████] 100% (of currently planned work — Phase 3 has no plans yet)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-08-25 — Milestone v1.1 Education Claim started
 
 ## Performance Metrics
 

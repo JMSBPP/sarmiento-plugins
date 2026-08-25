@@ -8,15 +8,28 @@ A private Haskell Stack project that ships a DeepSeek Harness (Cordis) plugin wh
 
 A Sarmiento claim goes in, a dimensionally-typed Kaleckian shock grounded in real `mamertomics-db` data comes out — through the harness plugin protocol, with every number carrying provenance and units.
 
+## Current Milestone: v1.1 Education Claim
+
+**Goal:** Run the first end-to-end Sarmiento claim through the plugin's typed pipeline — the education-subsidy → private-markup critique — on fixture data, while establishing the cross-repo delegation path (data-need issues to `mamertomics-etl`, type-need issues to `kalecky-semantics`) and landing CI.
+
+**Target features:**
+- CI (carried from v1.0): GitHub Actions build+test with private-repo token auth and lockfile-drift check
+- `EducationSubsidy` claim ADT + JSON codec (programs SPP, JE; observable E_pr/E_G responding to subsidy `s`)
+- Data-need contract: machine-readable spec of required series (subsidy `s` per program, private/public enrollment E_pr/E_G, private tuition price P_{E_pr}) with units/frequency/provenance, generated from the types and filed as an issue on `mamertomics-etl`; fixture CSVs in that shape
+- Type-need contract: spec of kernel types the claim needs (elasticity as `Kalecky.Operators.Effect`, an education `PriceIndex`, the Attribution mechanism Ω_{(E,E_pr)}(;s) with belong condition ε>1), filed as an issue on `kalecky-semantics`; local Ω stub deleted when upstream lands it
+- Grounding: ε_{E_pr/E_G}(s) and ε_{P/E} estimated from fixture series; markup m_{E_pr} = 1/|ε_{P/E}| with provenance band and `is_assumed` flags
+- Markup shock output format: first concrete shock codec consumable by a kalecky-plugin; fixture-driven end-to-end test claim JSON → shock JSON
+
+**Claim source:** `TODO.md` (user note, 2026-08-25) — to be moved under `src/Education/`.
+
 ## Requirements
 
 ### Validated
 
-(None yet — ship to validate)
+- ✓ Stack project builds/tests on lts-24.56 with the three upstreams pinned by SHA, import-proof module, dimensional-types guard — v1.0 (Phases 1–2)
 
 ### Active
 
-- [ ] Stack project builds against git extra-deps `JMSBPP/mamertomics-etl` (private) and `d2p-finance/haskell-deepseek-plugin-sdk` (public), pinned by commit and bumped as the SDK evolves
 - [ ] Plugin drives a dedicated DeepSeek Harness child runtime as a JSON-RPC line-transport **client** (`initialize`, `session/prompt`, `session.event`, `shutdown`) via the SDK — research confirmed the harness's server side can only be a TypeScript Cordis runtime
 - [ ] Structured **claim input** format defined and typed: a Sarmiento claim (e.g. demand-regime, markup/distribution, external-constraint statements about the Colombian economy) as a Haskell ADT with JSON codec
 - [ ] Structured **shock output** format defined and typed: a Kaleckian shock (parameter/exogenous perturbation on the kernel: markup, wage share, autonomous demand, capacity utilization, external constraint) as a Haskell ADT with JSON codec, units from `kalecky`
@@ -68,8 +81,10 @@ A Sarmiento claim goes in, a dimensionally-typed Kaleckian shock grounded in rea
 | Track upstream `d2p-finance` SDK, sync as it evolves | User decision 2026-08-25; the SDK is developed upstream, this project is a consumer | — Pending |
 | Plugin is a contained agent (harness-supplied context), not a tool-only plugin | Matches the harness's `subagent-dsh-sdk` model and the user's framing | — Pending |
 | `KaleckianKernel` lives in `kalecky-semantics`; Sarmiento instance here consumes its API | User decision 2026-08-25; keeps kernel genericity with the type owner | — Pending |
-| v1 = scaffold + deps + CI only; protocol, formats, grounding deferred to v2 | All three upstreams are stubs today; user chose to wait for the ETL API and defer protocol | — Pending |
+| v1.0 = scaffold + deps; CI folded into v1.1 with the first claim exercise | All three upstreams are stubs today; user chose to wait for the ETL API and defer protocol | — Pending |
+| Cross-repo delegation = GitHub issues carrying a machine-readable spec generated from this repo's types | User decision 2026-08-25; ETL and kalecky agents implement against the spec, user arbitrates in-thread | — Pending |
+| Grounding/estimation (elasticities → markup) lives here; kernel solving stays upstream | Translation is the plugin's job; the kernel is claim-agnostic and data-blind | — Pending |
 | Repo lives at `~/mamertomics/sarmiento-plugins` | Empty `~/mamertomics/` becomes the workspace for mamertomics-related repos | — Pending |
 
 ---
-*Last updated: 2026-08-25 after requirements definition*
+*Last updated: 2026-08-25 after v1.1 milestone start*
