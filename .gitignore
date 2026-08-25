@@ -1,0 +1,38 @@
+# --- Haskell build artefacts -------------------------------------------------
+.stack-work/
+dist-newstyle/
+dist/
+*.hi
+*.o
+*.dyn_hi
+*.dyn_o
+*.prof
+*.tix
+.hpc/
+.hie/
+
+# --- Editor and OS noise -----------------------------------------------------
+*~
+*.swp
+.DS_Store
+.vscode/
+.idea/
+
+# --- Secrets and credentials: never commit -----------------------------------
+# DB DSNs and API keys travel by environment only (PROJECT.md constraint).
+.env
+.env.*
+!.env.example
+.netrc
+*.pem
+*.key
+*.p12
+*.pfx
+credentials
+credentials.json
+secrets.yaml
+secrets.yml
+
+# --- Deliberately NOT ignored ------------------------------------------------
+# stack.yaml.lock      : pins the resolved snapshot; Phase 3 CI keys its cache on it
+# sarmiento-plugins.cabal : hpack output, committed to match JMSBPP/mamertomics-etl
