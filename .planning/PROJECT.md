@@ -17,18 +17,20 @@ A Sarmiento claim goes in, a dimensionally-typed Kaleckian shock grounded in rea
 ### Active
 
 - [ ] Stack project builds against git extra-deps `JMSBPP/mamertomics-etl` (private) and `d2p-finance/haskell-deepseek-plugin-sdk` (public), pinned by commit and bumped as the SDK evolves
-- [ ] Plugin speaks the DeepSeek Harness JSON-RPC line protocol (`dsh-sdk-protocol`: `initialize`, `session/prompt`, `session.event` notifications) as a contained agent whose context is supplied by the harness, in the shape the SDK exposes
+- [ ] Plugin drives a dedicated DeepSeek Harness child runtime as a JSON-RPC line-transport **client** (`initialize`, `session/prompt`, `session.event`, `shutdown`) via the SDK — research confirmed the harness's server side can only be a TypeScript Cordis runtime
 - [ ] Structured **claim input** format defined and typed: a Sarmiento claim (e.g. demand-regime, markup/distribution, external-constraint statements about the Colombian economy) as a Haskell ADT with JSON codec
 - [ ] Structured **shock output** format defined and typed: a Kaleckian shock (parameter/exogenous perturbation on the kernel: markup, wage share, autonomous demand, capacity utilization, external constraint) as a Haskell ADT with JSON codec, units from `kalecky`
 - [ ] Data access: plugin reads series from `mamertomics-db` (Supabase Postgres staging schema populated by `mamertomics-etl`) via the ETL package's types/API — no second schema, no hardcoded values
 - [ ] Claim → shock mapping: for each supported claim class, a deterministic, testable translation into a shock, with the data query that grounds its magnitude
-- [ ] `KaleckianKernel`: a generic, typed Kaleckian model interface (state, parameters, closure) that country plugins instantiate; `Sarmiento` = the Colombian instance
-- [ ] Formalization artefact: the Sarmiento-as-kernel-plugin mapping documented (LaTeX/markdown) with the math ↔ type correspondence
+- [ ] Formalization artefact: Sarmiento expressed as an instance of `kalecky-semantics`' `KaleckianKernel` (consumed via its API docs), documented (LaTeX/markdown) with the math ↔ type correspondence
+- [ ] `src/Education/README.md` placeholder — home for the claim taxonomy work, purpose to be decided
 - [ ] Test suite: codec round-trips, property tests on claim→shock invariants (dimensional consistency, sign conventions), protocol conformance against a fake harness runtime
 - [ ] CI on the private GitHub repo (build + tests), given private deps need a token
 
 ### Out of Scope
 
+- Implementing `KaleckianKernel` — owned by `JMSBPP/kalecky-semantics`; this project reads its API docs only (user decision 2026-08-25)
+- Querying live Supabase before `mamertomics-etl` exposes a read API — user decision 2026-08-25: wait for the ETL API
 - Solving the Kaleckian model — the plugin *produces shocks*; solving stays in the monorepo's GAMS closure / downstream model
 - Ingesting or transforming source data — `mamertomics-etl` owns fetch/parse/load; this project only reads staging tables
 - Writing the SDK's library API from this repo — the SDK (`d2p-finance`) evolves upstream; this project syncs to it and stubs only what it needs until the SDK lands it
@@ -41,7 +43,7 @@ A Sarmiento claim goes in, a dimensionally-typed Kaleckian shock grounded in rea
 - **Harness:** `github.com/deepseek-ai/deepseek-harness` ("Everything is a plugin", Cordis, developer preview with breaking changes). Native plugins are TypeScript; out-of-process integration is via the stdio JSON-RPC surface (`@deepseek-ai/dsh-sdk-protocol`, `JsonRpcLineTransport`, `InitializeParams/Result`, `SessionPromptParams/Result`, `session.event`/`subagent.started` notifications) used by the Python/TS SDKs and by the `subagent-dsh-sdk` backend, where a child is a complete harness runtime with its own `cordis.yml`. "Contained agent with specific context" maps onto that subagent model. The wire currently has no cancel method.
 - **SDK:** `d2p-finance/haskell-deepseek-plugin-sdk` — "Haskell SDK for building DeepSeek Harness (Cordis) plugins over JSON-RPC". As of 2026-08-25 it is a `stack new` scaffold (executable printing hello world, lts-22.43, no library). Fork `JMSBPP/haskell-deepseek-plugin-sdk-develop` (pushed 2026-08-25) is identical. Local clone: `~/ai-agents/haskell-deepseek-plugin-sdk`. Dependency tracks **upstream d2p-finance** (user decision 2026-08-25).
 - **mamertomics-db = `JMSBPP/mamertomics-etl`** (private). As of 2026-08-25 a `stack new` scaffold (lts-24.56, `Lib.hs`) with a GSD plan: Haskell ETL landing raw Colombian sources (DANE, BanRep, ANDI, minimum-wage decrees) into Supabase Storage + a typed staging schema on Supabase Postgres (project `xztxzcmjvluvddczdmra`), value types from `kalecky`. It exposes a JSON-RPC daemon and CLI. Its staging schema is the data this plugin reads. The name `mamertomics-db` today also exists as an executable in `mamertomics-monorepo/src/mamertomics-storage` (opaleye layer, 11 migrations) — that is the *predecessor*, not the dependency.
-- **Type source of truth:** `kalecky` (`JMSBPP/kalecky-semantics`, sublibrary, base-only): `Kalecky.Types.Units`, `Currency`, `Measure`, `Valuation`, `Prices.{Price,PriceIndex,Wage}`, operators `Gap/Delta/GrowthRate`. Extraction into a standalone package is already a prerequisite in the ETL plan; this project inherits it transitively and must not fork a third dimensional system.
+- **Type source of truth:** `kalecky` (`JMSBPP/kalecky-semantics`, sublibrary, base-only): `Kalecky.Types.Units`, `Currency`, `Measure`, `Valuation`, `Prices.{Price,PriceIndex,Wage}`, operators `Gap/Delta/GrowthRate`. As of commit `cd6778e` the repo is a plain Stack project (EVM/hevm/Lean dropped), so it is a normal pinned git extra-dep — the earlier 'locked in a Cabal sublibrary' blocker is resolved. `KaleckianKernel` is planned there, not here. Do not fork a third dimensional system.
 - **Economic frame:** Post-Keynesian / structuralist (Blecker & Setterfield 2019; Eduardo Sarmiento as Colombian referent). Kaleckian closure in use: `P = (1+m)·wL/Y` → `(W/Y, Π/Y)` → `I^d − S`; Sarmiento claims are read as statements about that closure's parameters and regime.
 - **Snapshot mismatch:** SDK on lts-22.43 (GHC 9.6), ETL on lts-24.56 (GHC 9.10). One snapshot must be chosen here; likely lts-24.x with the SDK asked to follow.
 - **Related repos:** `mamertomics-monorepo` (Codeberg canonical, GitHub CI mirror — never run its full test suite locally), `mamertomics-etl`, `kalecky-semantics`.
@@ -65,8 +67,9 @@ A Sarmiento claim goes in, a dimensionally-typed Kaleckian shock grounded in rea
 | `mamertomics-db` dependency = `JMSBPP/mamertomics-etl` | User decision 2026-08-25; the ETL's Supabase staging schema is the live DB, the monorepo storage layer is the predecessor | — Pending |
 | Track upstream `d2p-finance` SDK, sync as it evolves | User decision 2026-08-25; the SDK is developed upstream, this project is a consumer | — Pending |
 | Plugin is a contained agent (harness-supplied context), not a tool-only plugin | Matches the harness's `subagent-dsh-sdk` model and the user's framing | — Pending |
-| Generic `KaleckianKernel` + Sarmiento as Colombian instance | Second stated goal; keeps the formalization reusable and testable | — Pending |
+| `KaleckianKernel` lives in `kalecky-semantics`; Sarmiento instance here consumes its API | User decision 2026-08-25; keeps kernel genericity with the type owner | — Pending |
+| v1 = scaffold + deps + CI only; protocol, formats, grounding deferred to v2 | All three upstreams are stubs today; user chose to wait for the ETL API and defer protocol | — Pending |
 | Repo lives at `~/mamertomics/sarmiento-plugins` | Empty `~/mamertomics/` becomes the workspace for mamertomics-related repos | — Pending |
 
 ---
-*Last updated: 2026-08-25 after initialization*
+*Last updated: 2026-08-25 after requirements definition*
