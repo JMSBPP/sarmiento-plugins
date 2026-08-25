@@ -9,10 +9,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Scaffold
 
-- [ ] **SCAF-01**: Developer can run `stack build` on a fresh clone of `JMSBPP/sarmiento-plugins` (hpack `package.yaml`, library + test-suite skeleton, `-Wall` warnings set matching sibling repos) on snapshot **lts-24.56** (GHC 9.10.3)
-- [ ] **SCAF-02**: Repo has a `src/Education/README.md` placeholder (one-line stub; purpose decided later) and the module tree compiles with it present
+- [x] **SCAF-01**: Developer can run `stack build` on a fresh clone of `JMSBPP/sarmiento-plugins` (hpack `package.yaml`, library + test-suite skeleton, `-Wall` warnings set matching sibling repos) on snapshot **lts-24.56** (GHC 9.10.3)
+- [x] **SCAF-02**: Repo has a `src/Education/README.md` placeholder (one-line stub; purpose decided later) and the module tree compiles with it present
 - [x] **SCAF-03**: Repo has `README.md` stating what the plugin is, its upstreams, how to build, and `.gitignore` excluding `.stack-work/`, `.env`, credentials
-- [ ] **SCAF-04**: `stack test` runs a minimal tasty + QuickCheck suite (smoke test) so the CI test job is non-trivial from day one
+- [x] **SCAF-04**: `stack test` runs a minimal tasty + QuickCheck suite (smoke test) so the CI test job is non-trivial from day one
 
 ### Dependencies
 
@@ -79,10 +79,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SCAF-01 | Phase 1 | Pending |
-| SCAF-02 | Phase 1 | Pending |
+| SCAF-01 | Phase 1 | Complete |
+| SCAF-02 | Phase 1 | Complete |
 | SCAF-03 | Phase 1 | Complete |
-| SCAF-04 | Phase 1 | Pending |
+| SCAF-04 | Phase 1 | Complete |
 | DEPS-01 | Phase 2 | Pending |
 | DEPS-02 | Phase 2 | Pending |
 | DEPS-03 | Phase 2 | Pending |
