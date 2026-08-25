@@ -27,10 +27,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. `src/Education/README.md` exists as a one-line placeholder stub and the module tree compiles with it present
   3. `README.md` states what the plugin is, its upstreams, and how to build; `.gitignore` excludes `.stack-work/`, `.env`, and credentials
   4. `stack test` runs a minimal tasty + QuickCheck smoke suite successfully, so the CI test job will be non-trivial from day one
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Repo hygiene and documentation: `.gitignore` (build artefacts + credentials), `README.md` (what the plugin is, upstream table, build/test), `CHANGELOG.md` — SCAF-03
+- [ ] 01-02-PLAN.md — Buildable Stack project on lts-24.56: `stack.yaml` snapshot pin, hpack `package.yaml` (library + test-suite, sibling warning set), `Sarmiento.Plugin` module, `src/Education/` placeholder, tasty + QuickCheck smoke suite, fresh-clone build proof — SCAF-01, SCAF-02, SCAF-04
 
 ### Phase 2: Dependency Wiring
 **Goal**: The project is wired to its three pinned upstream git extra-deps (`mamertomics-etl`, `haskell-deepseek-plugin-sdk`, `kalecky-semantics`), each either importable or documented as executable-only, with the pin/bump discipline recorded.
@@ -67,6 +68,6 @@ Phases execute in numeric order: 1 → 2 → 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Scaffold | 0/TBD | Not started | - |
+| 1. Scaffold | 0/2 | Not started | - |
 | 2. Dependency Wiring | 0/TBD | Not started | - |
 | 3. CI | 0/TBD | Not started | - |
