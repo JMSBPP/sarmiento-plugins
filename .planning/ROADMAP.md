@@ -70,5 +70,5 @@ Phases execute in numeric order: 1 → 2 → 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Scaffold | 2/2 | Complete    | 2026-08-25 |
-| 2. Dependency Wiring | 2/2 | Complete   | 2026-08-25 |
+| 2. Dependency Wiring | 2/2 | Complete    | 2026-08-25 |
 | 3. CI | 0/TBD | Not started | - |
