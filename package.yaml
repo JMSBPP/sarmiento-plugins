@@ -1,0 +1,53 @@
+name:                sarmiento-plugins
+version:             0.1.0.0
+github:              "JMSBPP/sarmiento-plugins"
+license:             BSD-3-Clause
+author:              "JMSBPP"
+maintainer:          "juan.serranotmf@gmail.com"
+copyright:           "2026 JMSBPP"
+
+extra-source-files:
+- README.md
+- CHANGELOG.md
+
+synopsis:            DeepSeek Harness plugin translating Sarmiento claims into typed Kaleckian shocks
+category:            Economics
+
+description:         Please see the README on GitHub at <https://github.com/JMSBPP/sarmiento-plugins#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+# Warning set is byte-for-byte the same as JMSBPP/mamertomics-etl, so a module can move
+# between the two repositories without a warning-flag surprise. Warnings do not fail the
+# build in this phase (no error-on-warning flag is set).
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wmissing-export-lists
+- -Wmissing-home-modules
+- -Wpartial-fields
+- -Wredundant-constraints
+
+library:
+  source-dirs: src
+
+# No executable yet: this scaffold has no runnable entry point to expose. One is added
+# only if and when the plugin needs to be spawned as a process (v2).
+
+tests:
+  sarmiento-plugins-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - sarmiento-plugins
+    - tasty
+    - tasty-quickcheck
+    - QuickCheck

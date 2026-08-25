@@ -1,0 +1,16 @@
+# Snapshot pinned to Stackage lts-24.56 (GHC 9.10.3) — the same snapshot as
+# JMSBPP/mamertomics-etl, so the two projects share one compiler and one dependency set.
+#
+# The immutable URL form is used deliberately instead of the bare name `lts-24.56`:
+# Stack treats a URL-provided snapshot as fixed and will not re-resolve it.
+snapshot:
+  url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/24/56.yaml
+
+# User packages to be built.
+packages:
+- .
+
+# Git extra-deps (mamertomics-etl, haskell-deepseek-plugin-sdk, kalecky-semantics) are
+# added in Phase 2 — Dependency Wiring. Deliberately empty here so the scaffold builds
+# with no network access beyond the snapshot itself.
+extra-deps: []
