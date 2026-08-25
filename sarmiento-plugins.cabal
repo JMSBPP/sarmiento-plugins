@@ -27,6 +27,7 @@ source-repository head
 library
   exposed-modules:
       Sarmiento.Plugin
+      Sarmiento.Upstream
   other-modules:
       Paths_sarmiento_plugins
   autogen-modules:
