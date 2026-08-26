@@ -9,7 +9,7 @@
 ### Pitfall 1: Building the real plugin against two hello-world stubs
 
 **What goes wrong:**
-Both upstream dependencies — `d2p-finance/haskell-deepseek-plugin-sdk` and `JMSBPP/mamertomics-etl` — are `stack new` scaffolds today (no library, no exposed API). Writing plugin code "against" them right now means writing code against an API that doesn't exist yet, then discovering the real shapes (session/prompt types, RPC method names, ETL query functions) weeks later and rewriting.
+Both upstream dependencies — `d2p-finance/haskell-deepseek-plugin-sdk` and the data resource (HTTP pointer, v2) — are `stack new` scaffolds today (no library, no exposed API). Writing plugin code "against" them right now means writing code against an API that doesn't exist yet, then discovering the real shapes (session/prompt types, RPC method names, ETL query functions) weeks later and rewriting.
 
 **Why it happens:**
 The roadmap gets sequenced as if the SDK and ETL are stable dependencies to consume, when in fact this project and its two upstreams are being developed in parallel by the same author. It's tempting to start "plugin logic" work immediately because the repo itself is initialized and eager to show progress.
@@ -71,18 +71,18 @@ Phase 1 (JSON-RPC Transport Implementation).
 ### Pitfall 4: Private Stack git extra-dep auth, hpack/subdir quirks, and lockfile churn
 
 **What goes wrong:**
-`JMSBPP/mamertomics-etl` is private. Stack's git extra-deps clone over whatever git transport is configured — this works transparently on a laptop with an SSH key or cached credential helper, and then fails opaquely in CI with a generic "fatal: could not read from remote repository" that gives no hint it's an auth problem versus a bad commit pin. Separately, the ETL's own `kalecky` note (Stack cannot depend on Cabal sublibraries — `commercialhaskell/stack` issues #5318/#5256) is a live landmine one level removed: if `kalecky`'s extraction into a standalone package slips, `mamertomics-etl`'s own `stack.yaml` can't express it as a normal extra-dep, and this project inherits that breakage transitively the moment it tries to build ETL as a git dep. `stack.yaml.lock` also pins the exact resolved commit/subdir combination — every deliberate upstream bump touches this lockfile, and if it's not committed atomically with the bump, other developers/CI silently build against a stale pin.
+the data resource (HTTP pointer, v2) is private. Stack's git extra-deps clone over whatever git transport is configured — this works transparently on a laptop with an SSH key or cached credential helper, and then fails opaquely in CI with a generic "fatal: could not read from remote repository" that gives no hint it's an auth problem versus a bad commit pin. Separately, the ETL's own `kalecky` note (Stack cannot depend on Cabal sublibraries — `commercialhaskell/stack` issues #5318/#5256) is a live landmine one level removed: if `kalecky`'s extraction into a standalone package slips, the data resource's own `stack.yaml` can't express it as a normal extra-dep, and this project inherits that breakage transitively the moment it tries to build ETL as a git dep. `stack.yaml.lock` also pins the exact resolved commit/subdir combination — every deliberate upstream bump touches this lockfile, and if it's not committed atomically with the bump, other developers/CI silently build against a stale pin.
 
 **Why it happens:**
 Local dev machines have long-lived git credentials that mask the auth requirement; hpack `subdirs`/`git` extra-dep syntax is easy to get subtly wrong (missing `subdirs:` when the package isn't at repo root); and lockfiles are the kind of generated file that's easy to `.gitignore` by habit or forget to re-commit after `stack build` regenerates it.
 
 **How to avoid:**
-Use a dedicated machine-user or fine-grained PAT with read-only access to `mamertomics-etl`, injected via `GIT_ASKPASS`/`.netrc`/SSH deploy key in CI — never a personal token — and fail CI explicitly (with a clear message) rather than let a generic git error stand in for "check the credential." Confirm `kalecky` has actually landed as a standalone package (not still a sublibrary) before pinning `mamertomics-etl` as an extra-dep that transitively needs it — this is a real prerequisite blocking on the ETL project's own Phase-0 gate, not just documentation. Commit `stack.yaml.lock` alongside every deliberate extra-dep bump, and add a CI check that fails if `stack.yaml` changed but the lock didn't (or vice versa, uncommitted drift).
+Use a dedicated machine-user or fine-grained PAT with read-only access to the data resource, injected via `GIT_ASKPASS`/`.netrc`/SSH deploy key in CI — never a personal token — and fail CI explicitly (with a clear message) rather than let a generic git error stand in for "check the credential." Confirm `kalecky` has actually landed as a standalone package (not still a sublibrary) before pinning the data resource as an extra-dep that transitively needs it — this is a real prerequisite blocking on the ETL project's own Phase-0 gate, not just documentation. Commit `stack.yaml.lock` alongside every deliberate extra-dep bump, and add a CI check that fails if `stack.yaml` changed but the lock didn't (or vice versa, uncommitted drift).
 
 **Warning signs:**
 - `stack build` works locally, fails in CI with a git auth error
 - `stack.yaml.lock` shows uncommitted changes after a routine `stack build` in a clean checkout
-- Building `mamertomics-etl` as a dependency fails with a sublibrary/package-not-found error rather than a normal compile error
+- Building the data resource as a dependency fails with a sublibrary/package-not-found error rather than a normal compile error
 
 **Phase to address:**
 Phase 0 (Dependency & Protocol Foundations) for CI auth + lockfile discipline; re-verify at every deliberate bump, not just once.
@@ -156,7 +156,7 @@ Phase 2 (Data Access Layer) — before any query code is written, not discovered
 ### Pitfall 8: Hardcoded "illustrative" numbers smuggled in as if grounded
 
 **What goes wrong:**
-Under time pressure ("I just need to see the JSON codec round-trip"), it's tempting to write a shock output with a plausible-looking magnitude (e.g., `markupShock = 0.03`) as a placeholder — and then never come back to wire it to a real `mamertomics-db` query, or worse, ship it. This project's own constraints explicitly forbid this ("no hardcoded 'illustrative' numeric literals — magnitudes come from `mamertomics-db` with provenance, or the work stops"), and the predecessor monorepo has the identical rule for the same reason: it has already been an ongoing discipline problem in this economist's toolchain, not a hypothetical risk.
+Under time pressure ("I just need to see the JSON codec round-trip"), it's tempting to write a shock output with a plausible-looking magnitude (e.g., `markupShock = 0.03`) as a placeholder — and then never come back to wire it to a real the macro data resource query, or worse, ship it. This project's own constraints explicitly forbid this ("no hardcoded 'illustrative' numeric literals — magnitudes come from the macro data resource with provenance, or the work stops"), and the predecessor monorepo has the identical rule for the same reason: it has already been an ongoing discipline problem in this economist's toolchain, not a hypothetical risk.
 
 **Why it happens:**
 Placeholder values are the path of least resistance when the ETL API isn't ready yet (see Pitfall 1) — a developer wants forward progress on the claim→shock mapping logic without being blocked on data access, so a stand-in number creeps in and, once tests pass against it, there's no forcing function to replace it before it looks "done."
@@ -240,18 +240,18 @@ Phase 3 (Claim/Shock Type Design).
 ### Pitfall 12: Scope creep into solving the model or re-ingesting data
 
 **What goes wrong:**
-Two specific scope boundaries are stated as explicit out-of-scope items and are also the two most tempting things to accidentally start doing: (1) adding any code that closes/solves the Kaleckian system (computing equilibrium `I^d = S`, running a GAMS-equivalent closure locally) instead of stopping at "produce the shock"; (2) adding any code that fetches/parses source data directly (DANE, BanRep, ANDI) instead of reading only the ETL's staging schema. Both are easy to justify locally — "I just need to sanity-check this shock by running it through a tiny toy closure," or "the ETL doesn't have this series yet, I'll just pull it myself for now" — and both quietly duplicate ownership that already lives, deliberately, in other repos (monorepo's GAMS bridge; `mamertomics-etl`'s fetch/parse layer).
+Two specific scope boundaries are stated as explicit out-of-scope items and are also the two most tempting things to accidentally start doing: (1) adding any code that closes/solves the Kaleckian system (computing equilibrium `I^d = S`, running a GAMS-equivalent closure locally) instead of stopping at "produce the shock"; (2) adding any code that fetches/parses source data directly (DANE, BanRep, ANDI) instead of reading only the ETL's staging schema. Both are easy to justify locally — "I just need to sanity-check this shock by running it through a tiny toy closure," or "the ETL doesn't have this series yet, I'll just pull it myself for now" — and both quietly duplicate ownership that already lives, deliberately, in other repos (monorepo's GAMS bridge; the data resource's fetch/parse layer).
 
 **Why it happens:**
 Both boundaries are easy to cross when the other project isn't ready (again, Pitfall 1's shadow): if ETL doesn't have a series yet, going and fetching it directly feels like unblocking yourself rather than scope creep, even though it creates a second, divergent ingestion path with no reconciliation against the ETL's provenance/watermark discipline. Similarly, sanity-checking a shock's plausibility naturally invites "let me just see what it does to the model," which is a small step from building a second, informal model-solving path that competes with the monorepo's.
 
 **How to avoid:**
-When a needed series doesn't exist in staging yet, the correct action is the same "work stops, question surfaced" rule as Pitfall 8 — file it as a gap against `mamertomics-etl`, don't fetch around it. When a shock needs sanity-checking, do it by inspecting its type/units/magnitude against the claim and existing test oracles, not by executing it against an ad hoc closure implementation living in this repo. Any code that looks like it's computing an equilibrium, a closure solution, or fetching from DANE/BanRep/ANDI URLs directly is a scope violation by definition, regardless of how small or "just for testing" it's framed as.
+When a needed series doesn't exist in staging yet, the correct action is the same "work stops, question surfaced" rule as Pitfall 8 — file it as a gap against the data resource, don't fetch around it. When a shock needs sanity-checking, do it by inspecting its type/units/magnitude against the claim and existing test oracles, not by executing it against an ad hoc closure implementation living in this repo. Any code that looks like it's computing an equilibrium, a closure solution, or fetching from DANE/BanRep/ANDI URLs directly is a scope violation by definition, regardless of how small or "just for testing" it's framed as.
 
 **Warning signs:**
 - Any import of an HTTP client aimed at a DANE/BanRep/ANDI URL, or an `.xlsx`/API parser, appears in this repo
 - Any function computes a fixed point, equilibrium, or iterative solve over Kaleckian state
-- A "quick script" in this repo queries a data source that isn't `mamertomics-db`
+- A "quick script" in this repo queries a data source that isn't the macro data resource
 
 **Phase to address:**
 Ongoing — call out explicitly in every phase's success criteria as a negative check, not just once at kickoff.
@@ -272,12 +272,12 @@ Ongoing — call out explicitly in every phase's success criteria as a negative 
 
 | Integration | Common Mistake | Correct Approach |
 |-------------|-----------------|-------------------|
-| Stack git extra-dep (private `mamertomics-etl`) | Rely on a personal, long-lived git credential that "just works" locally and fails opaquely in CI | Dedicated read-only machine-user/PAT, injected explicitly in CI, with a clear auth-failure message distinguished from a bad-commit-pin failure |
+| Stack git extra-dep (private the data resource) | Rely on a personal, long-lived git credential that "just works" locally and fails opaquely in CI | Dedicated read-only machine-user/PAT, injected explicitly in CI, with a clear auth-failure message distinguished from a bad-commit-pin failure |
 | Stack git extra-dep (`kalecky` transitively via ETL) | Assume `kalecky` is a normal dependency without checking it has actually been extracted from the hevm-fork sublibrary | Verify `kalecky` is a standalone package (not a Cabal sublibrary) before pinning ETL as a dependency; this is a hard prerequisite, not a soft assumption |
 | DeepSeek Harness JSON-RPC (developer preview) | Treat method/param shapes as stable API; assume a clean `cancel` exists | Isolate wire types behind an adapter; design for interruption-by-termination since there's no cancel method; re-verify protocol version on every SDK bump |
 | Supabase Postgres (Supavisor) | Copy the transaction-mode (6543) connection string from a dashboard example | Default to session-mode pooler (5432), matching the ETL's own resolved decision; require SSL explicitly |
 | Supabase Postgres (direct host) | Assume a direct-host connection timeout is a credentials/firewall problem | Check IPv6 egress first — the direct host is IPv6-only without the paid IPv4 add-on |
-| `mamertomics-etl`'s query API | Query the staging Postgres schema directly with hand-rolled SQL instead of going through the ETL's exposed types/functions | Use only the ETL package's own API surface — "no second schema, no hardcoded values" is a stated project constraint |
+| the data resource's query API | Query the staging Postgres schema directly with hand-rolled SQL instead of going through the ETL's exposed types/functions | Use only the ETL package's own API surface — "no second schema, no hardcoded values" is a stated project constraint |
 
 ## Performance Traps
 
@@ -292,7 +292,7 @@ Ongoing — call out explicitly in every phase's success criteria as a negative 
 |---------|------|------------|
 | Supabase DSN or CI git token committed to `stack.yaml`, a `.env` file tracked in git, or logged in plugin stderr output during debugging | Credential leak from a private repo that may later be shared/reviewed; DB or repo compromise | Environment/vault only, as the project's own constraint already states; add a pre-commit or CI secret-scan check specifically because this has already been an explicit rule in the predecessor monorepo |
 | Logging query parameters or fetched series values to stderr for debugging | Structured logs (even to stderr, even in a private repo) can leak data provenance details or, combined with DSN leakage, raw macro data that should stay behind the ETL's own access boundary | Log query *shape* (claim class, series ID, timestamp) not raw values; mirror the ETL project's own "no raw data values in logs" rule |
-| Machine-user PAT for the private `mamertomics-etl` extra-dep scoped broader than read-only on that one repo | Compromised CI secret grants more access than needed | Fine-grained PAT/deploy key scoped to exactly the one private repo, read-only |
+| Machine-user PAT for the private the data resource extra-dep scoped broader than read-only on that one repo | Compromised CI secret grants more access than needed | Fine-grained PAT/deploy key scoped to exactly the one private repo, read-only |
 
 ## "Looks Done But Isn't" Checklist
 
@@ -340,7 +340,7 @@ Ongoing — call out explicitly in every phase's success criteria as a negative 
 - [supabase/discussions #28239 — Disabling Prepared statements](https://github.com/orgs/supabase/discussions/28239) — MEDIUM (community, corroborates official docs)
 - [Model Context Protocol — Transports (stdio hygiene, newline-delimited framing)](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports) — HIGH (official spec; JSON-RPC line-transport rules are shared ancestry with LSP/MCP/DSH's own protocol)
 - [Transport I, stdio: Two Pipes and a Subprocess](https://imti.co/mcp-transport-stdio/) — MEDIUM
-- Project-internal sources verified directly: `/home/jmsbpp/mamertomics/sarmiento-plugins/.planning/PROJECT.md`, `/home/jmsbpp/mamertomics-etl/.planning/PROJECT.md` (Stack sublibrary issue #5318/#5256 citation, Supavisor pooler port decision, IPv6-only direct host, `kalecky` `PriceIndex`/`Unit` gaps, `mamertomics-core` overlap warning), `/home/jmsbpp/mamertomics-monorepo/CLAUDE.md` (predecessor's hard rules on no-hardcoded-illustrative-numbers and CI/local-resource discipline, used as evidence this is a live discipline problem in this toolchain, not hypothetical) — HIGH (primary source, this project's own stated facts)
+- Project-internal sources verified directly: `/home/jmsbpp/mamertomics/sarmiento-plugins/.planning/PROJECT.md`, `/home/jmsbpp/the data resource/.planning/PROJECT.md` (Stack sublibrary issue #5318/#5256 citation, Supavisor pooler port decision, IPv6-only direct host, `kalecky` `PriceIndex`/`Unit` gaps, `mamertomics-core` overlap warning), `/home/jmsbpp/mamertomics-monorepo/CLAUDE.md` (predecessor's hard rules on no-hardcoded-illustrative-numbers and CI/local-resource discipline, used as evidence this is a live discipline problem in this toolchain, not hypothetical) — HIGH (primary source, this project's own stated facts)
 
 ---
 *Pitfalls research for: Haskell DeepSeek Harness plugin over JSON-RPC with Supabase-backed economics formalization*

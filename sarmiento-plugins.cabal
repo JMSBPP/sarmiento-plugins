@@ -38,7 +38,6 @@ library
   build-depends:
       base >=4.7 && <5
     , kalecky-semantics
-    , mamertomics-etl
   default-language: Haskell2010
 
 test-suite sarmiento-plugins-test
@@ -55,7 +54,6 @@ test-suite sarmiento-plugins-test
       QuickCheck
     , base >=4.7 && <5
     , kalecky-semantics
-    , mamertomics-etl
     , sarmiento-plugins
     , tasty
     , tasty-quickcheck

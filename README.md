@@ -14,9 +14,9 @@
 A Haskell project that will ship a **DeepSeek Harness (Cordis) plugin acting as a
 contained agent**. Given structured claims by the Colombian economist Eduardo Sarmiento —
 statements about demand regime, markup and income distribution, the external constraint, and
-productive structure — the plugin will read Colombian macroeconomic series from
-`mamertomics-db` and emit **dimensionally-typed Kaleckian shocks** that a Kaleckian model
-consumes.
+productive structure — the plugin will read Colombian macroeconomic series from a data
+resource addressed by URL (the exact HTTP/resource pointer is specified in v2) and emit
+**dimensionally-typed Kaleckian shocks** that a Kaleckian model consumes.
 
 The design rule that makes this worth building: every emitted number carries its units and
 its provenance. A shock magnitude either traces back to an observation in the staging
@@ -28,11 +28,11 @@ so "Sarmiento" becomes a typed plugin over a reusable kernel rather than prose.
 
 ## Status
 
-**Scaffold plus wired dependencies.** This repository builds, tests, and resolves all three
-of its upstreams; it does not yet do any economics:
+**Scaffold plus wired dependencies.** This repository builds, tests, and resolves both of
+its upstreams; it does not yet do any economics:
 
-- the three upstream dependencies below are pinned by commit and wired — a module in this
-  project imports a real symbol from each upstream that exposes a library, so a broken pin
+- the two upstream dependencies below are pinned by commit and wired — a module in this
+  project imports a real symbol from the upstream that exposes a library, so a broken pin
   is a compile error;
 - the claim input format, the shock output format, the JSON-RPC protocol client, and the
   data grounding are all still deferred to v2;
@@ -48,15 +48,19 @@ dependency archaeology exercise.
 | Repository | Owner | Visibility | Pinned commit | Why |
 |---|---|---|---|---|
 | `kalecky-semantics` | `JMSBPP` | public | `cd6778e2d39c5eb30549d8ff87459b5644cc18fc` | The sole source of dimensional, unit, currency and price types (`Kalecky.Types.Units.*`, `Kalecky.Types.Currency`, `Kalecky.Types.Measure`, `Kalecky.Types.Valuation`, `Kalecky.Types.Prices.*`) and, in future, the generic `KaleckianKernel` this project instantiates for Colombia. Has zero non-`base` dependencies, so depending on it pulls nothing else into the build plan. |
-| `mamertomics-etl` | `JMSBPP` | private | `c8b45ac159553017df82c4258af3d2bf68b5f62e` | Owns `mamertomics-db`, the Supabase staging schema of Colombian macro series (DANE, BanRep, ANDI, minimum-wage decrees). This project only *reads* it; it never ingests or transforms source data. Its real read API is v2 — today it exposes a scaffold module, which is enough to pin and prove the dependency edge. |
 | `haskell-deepseek-plugin-sdk` | `d2p-finance` | public | `242ebfa05acd318326aea7f35508d7d4c1bbdbfa` | Haskell SDK for building DeepSeek Harness (Cordis) plugins over JSON-RPC. This project is a consumer, not a co-author. **No importable symbol at this pin — see the note below.** |
 
 ### How each dependency is wired
 
-`kalecky-semantics` and `mamertomics-etl` are declared in both `stack.yaml` `extra-deps:`
-and `package.yaml` `dependencies:`. `src/Sarmiento/Upstream.hs` imports a real symbol from
-each, so a broken pin fails `stack build` with a "Could not find module" error rather than
-surfacing much later.
+`kalecky-semantics` is declared in both `stack.yaml` `extra-deps:` and `package.yaml`
+`dependencies:`. `src/Sarmiento/Upstream.hs` imports a real symbol from it, so a broken pin
+fails `stack build` with a "Could not find module" error rather than surfacing much later.
+
+**Data is not a Haskell dependency.** The Colombian macro series the plugin reads (DANE,
+BanRep, ANDI, minimum-wage decrees) are reached through an HTTP/resource pointer, not by
+linking against the repository that produces them. That pointer, and the read API behind it,
+are specified in v2. This project only *reads* the data; it never ingests or transforms
+source data.
 
 **No third dimensional system.** Units, currencies, and price/wage types come from
 `kalecky-semantics` only. This project does not define its own, and
@@ -81,9 +85,9 @@ the SDK's upstream HEAD moved before this repository's pin was fixed, and the co
 here now genuinely has a `library` stanza. Adding it to `package.yaml` `dependencies:` does
 not fail the build plan the way a truly library-less package would (verified directly:
 `stack build` links it cleanly with it declared as a dependency). What blocks wiring it like
-the other two upstreams is narrower and more mechanical: there is no exported name anywhere
+the other upstream is narrower and more mechanical: there is no exported name anywhere
 in its seven modules to reference, so no compile-time proof of the pin — the same kind
-`src/Sarmiento/Upstream.hs` gives for `kalecky-semantics` and `mamertomics-etl` — is possible
+`src/Sarmiento/Upstream.hs` gives for `kalecky-semantics` — is possible
 for it today. Adding it to `dependencies:` now would add a real build edge to nothing.
 
 What is actually proven about this dependency today, and nothing stronger: the pinned commit
@@ -150,9 +154,7 @@ scaffold phase, and it is what Phase 3's CI will assert on every push.
 ## Snapshot
 
 Pinned to Stackage **`lts-24.56`** (GHC 9.10.3), declared by immutable snapshot URL rather
-than by name so Stack treats it as fixed. This is the same snapshot `mamertomics-etl` uses,
-which means the two projects share one compiler and one dependency set — zero cross-compiler
-friction now that `mamertomics-etl` is wired in as a pinned git dependency.
+than by name so Stack treats it as fixed.
 
 ## Layout
 
@@ -172,9 +174,7 @@ regenerated on every `stack build`.
 
 ## Conventions
 
-- **Warnings:** the `-Wall`-plus set matches `mamertomics-etl` exactly, so a module can move
-  between the two repositories without a warning-flag surprise.
 - **Secrets:** database DSNs and API keys travel by environment variable only. They are never
   written to config files, logs, or commits.
 - **Data integrity:** no hardcoded "illustrative" numeric literals. A magnitude either comes
-  from `mamertomics-db` with provenance, or the work stops and the question is surfaced.
+  from the data resource with provenance, or the work stops and the question is surfaced.

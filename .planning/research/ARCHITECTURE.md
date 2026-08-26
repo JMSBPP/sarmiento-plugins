@@ -83,8 +83,8 @@ No `subagent.started`/`subagent.finished` handling is required unless the Sarmie
 └──────────────────────────────────────────────────────────────────────────┘
                 │                                    │
                 ▼                                    ▼
-      DeepSeek Harness runtime            mamertomics-db (Supabase Postgres,
-      (LLM, tools, session log)           owned by mamertomics-etl staging schema)
+      DeepSeek Harness runtime            the macro data resource (Supabase Postgres,
+      (LLM, tools, session log)           owned by the data resource staging schema)
 ```
 
 ### Component Responsibilities
@@ -93,7 +93,7 @@ No `subagent.started`/`subagent.finished` handling is required unless the Sarmie
 |---|---|---|
 | **Protocol Adapter** | Owns the `haskell-deepseek-plugin-sdk` client surface: spawn child harness, `initialize`, `session/prompt`, drain `session.event`s, extract the prompt text (the Sarmiento claim, or a request to analyze one) and return the final assistant turn | Child harness process (stdio); Claim Parser (feeds it raw prompt text / receives formatted responses) |
 | **Claim Parser** | Parses/validates the structured claim-input ADT (JSON in, from either the harness prompt or a direct API) into the typed `SarmientoClaim` sum type; owns the input JSON codec | Protocol Adapter (input side); Claim→Shock Translator (typed claim out) |
-| **Data-Grounding** | Issues typed queries against the `mamertomics-etl` staging schema (via the ETL's exposed types/API — no second schema, no hardcoded literals) for exactly the series a claim class needs to size its shock | mamertomics-etl (Postgres client / RPC, TBD which); Claim→Shock Translator (supplies grounding data) |
+| **Data-Grounding** | Issues typed queries against the the data resource staging schema (via the ETL's exposed types/API — no second schema, no hardcoded literals) for exactly the series a claim class needs to size its shock | the data resource (Postgres client / RPC, TBD which); Claim→Shock Translator (supplies grounding data) |
 | **Claim→Shock Translator** | One deterministic, testable function per claim class: `(SarmientoClaim, GroundingData) -> Either TranslationError ShockSpec` | Claim Parser (typed claim in), Data-Grounding (magnitudes in), KaleckianKernel types (shock shape out) |
 | **KaleckianKernel** | Generic typed Kaleckian model interface (state, parameters, closure) that country instances implement; `Sarmiento` is the Colombian instance | Claim→Shock Translator (shock target vocabulary); Shock Codec (serializes kernel-typed shocks) |
 | **Shock Codec** | Aeson `ToJSON`/`FromJSON` (or equivalent) for the output `ShockSpec`, carrying `kalecky`-typed magnitudes + `mamertomics-core`-typed provenance | Claim→Shock Translator (in); Protocol Adapter or a direct output channel (out — format TBD, PROJECT.md marks this "to be specified") |
@@ -114,7 +114,7 @@ From `kalecky-spec/src/Kalecky/Types/*`: `Unit basis` (amount + `Scale`, `HasSca
 
 Two concrete facts from reading the source, both load-bearing for this project's Shock Codec design:
 
-1. **`kalecky`'s `Unit` cannot represent negative values, index numbers as first-class quantities (`PriceIndex` is an opaque tag), or USD amounts (`tradeableBase USD = Nothing`, deliberately deferred).** The `mamertomics-etl` PROJECT.md already documents the consequence at the staging-DB layer: `value_numeric NUMERIC` always plus kalecky-derived dimension columns plus a `dim_status` flag saying whether a kalecky value was constructible. **This project's Data-Grounding layer inherits that same gap**: a query against the ETL staging schema may return a grounding value that has no valid `kalecky.Unit`/`Price` construction (e.g., a negative discrepancy, a USD-denominated series). The Claim→Shock Translator must therefore accept `Either GroundingError GroundedValue` from Data-Grounding, not assume every queried series is kalecky-typed — and the Shock Codec's output ADT needs the same `dim_status`-shaped honesty (a shock magnitude with untyped/raw-numeric provenance is a valid, disclosed output, not a silently-dropped one).
+1. **`kalecky`'s `Unit` cannot represent negative values, index numbers as first-class quantities (`PriceIndex` is an opaque tag), or USD amounts (`tradeableBase USD = Nothing`, deliberately deferred).** The the data resource PROJECT.md already documents the consequence at the staging-DB layer: `value_numeric NUMERIC` always plus kalecky-derived dimension columns plus a `dim_status` flag saying whether a kalecky value was constructible. **This project's Data-Grounding layer inherits that same gap**: a query against the ETL staging schema may return a grounding value that has no valid `kalecky.Unit`/`Price` construction (e.g., a negative discrepancy, a USD-denominated series). The Claim→Shock Translator must therefore accept `Either GroundingError GroundedValue` from Data-Grounding, not assume every queried series is kalecky-typed — and the Shock Codec's output ADT needs the same `dim_status`-shaped honesty (a shock magnitude with untyped/raw-numeric provenance is a valid, disclosed output, not a silently-dropped one).
 2. **`kalecky`'s valuation/currency/measure gates are type-level (`DataKinds`), not runtime checks.** A `KaleckianKernel` state vector built from `kalecky` primitives (e.g., a wage-share shock as `Gap (AgentMeasure Firm) (Wage 'Nominal 'COP l)`) gets compile-time protection against mixing nominal/real or COP/USD magnitudes — but only if the kernel's own types are parametrized the same way. A `KaleckianKernel` typeclass/record whose methods are polymorphic over `v :: Valuation`/`c :: Currency` inherits this safety "for free"; one that erases to a bare `Double`/`Scientific` at the kernel boundary throws it away. This is a genuine design fork addressed in Part 3.
 
 ## Part 3 — `KaleckianKernel` Design
@@ -191,9 +191,9 @@ This is the one place a typeclass is the right tool — for exactly the reason `
 ## Part 4 — Data Flow and Where Provenance Travels
 
 ```
-mamertomics-db (Supabase Postgres staging schema)
+the macro data resource (Supabase Postgres staging schema)
    │  typed series: value_numeric NUMERIC + kalecky-derived dimension
-   │  columns + dim_status flag (per mamertomics-etl PROJECT.md)
+   │  columns + dim_status flag (per the data resource PROJECT.md)
    ▼
 Data-Grounding query  ──────────────────────────────────────────┐
    │  returns: Either GroundingError                            │
@@ -224,13 +224,13 @@ Protocol Adapter → child harness process (session/prompt content,
    format TBD per PROJECT.md) OR a direct file/API output channel
 ```
 
-**Provenance discipline, carried over from `mamertomics-core`'s own locked decision:** every value that reaches the Shock Codec's output MUST carry its six mandatory `Provenance` fields (`downloadedAt`, `periodicity`, `sampleSize`, `initDate`, `dimension`, `source`) — never a `Maybe Provenance`. This directly satisfies PROJECT.md's stated constraint: *"no hardcoded 'illustrative' numeric literals — magnitudes come from `mamertomics-db` with provenance, or the work stops."* Concretely: **`ShockSpec`'s `NumericShock` constructor needs a `Provenance` field added** relative to `mamertomics-core`'s current definition (today it carries only `DataPoint` + `ShockKind` — that is a monorepo-internal gap this project should NOT inherit silently; either extend the vendored copy, or flag it as a required upstream change if `mamertomics-core` becomes a real dependency).
+**Provenance discipline, carried over from `mamertomics-core`'s own locked decision:** every value that reaches the Shock Codec's output MUST carry its six mandatory `Provenance` fields (`downloadedAt`, `periodicity`, `sampleSize`, `initDate`, `dimension`, `source`) — never a `Maybe Provenance`. This directly satisfies PROJECT.md's stated constraint: *"no hardcoded 'illustrative' numeric literals — magnitudes come from the macro data resource with provenance, or the work stops."* Concretely: **`ShockSpec`'s `NumericShock` constructor needs a `Provenance` field added** relative to `mamertomics-core`'s current definition (today it carries only `DataPoint` + `ShockKind` — that is a monorepo-internal gap this project should NOT inherit silently; either extend the vendored copy, or flag it as a required upstream change if `mamertomics-core` becomes a real dependency).
 
 **`kalecky` vs raw-numeric fork, and where it resolves:** because `kalecky.Unit`/`Price` cannot represent every value the staging schema might return (negatives, indices, non-COP currencies — see Part 2), the fork is resolved as early as possible, at Data-Grounding's boundary, and carried as an explicit `Maybe` all the way to the Shock Codec's output rather than being silently coerced or dropped. A shock magnitude with `gvKalecky = Nothing` is a legitimate, disclosed output (raw-numeric, no compile-time unit safety) — never a translation failure by itself.
 
 ## Part 5 — Keeping the Two Stub Dependencies From Blocking
 
-Both `d2p-finance/haskell-deepseek-plugin-sdk` and `JMSBPP/mamertomics-etl` were directly inspected (Bash `find`) and confirmed, as of 2026-08-25, to be **bare `stack new` scaffolds** — `haskell-deepseek-plugin-sdk` has `src/Main.hs` printing hello-world and no library section in its `.cabal`; `mamertomics-etl` has `src/Lib.hs` and no exposed staging-schema API. Neither can be depended on for real functionality today, yet PROJECT.md commits to depending on both as pinned git extra-deps.
+Both `d2p-finance/haskell-deepseek-plugin-sdk` and the data resource (HTTP pointer, v2) were directly inspected (Bash `find`) and confirmed, as of 2026-08-25, to be **bare `stack new` scaffolds** — `haskell-deepseek-plugin-sdk` has `src/Main.hs` printing hello-world and no library section in its `.cabal`; the data resource has `src/Lib.hs` and no exposed staging-schema API. Neither can be depended on for real functionality today, yet PROJECT.md commits to depending on both as pinned git extra-deps.
 
 **Interface-first, local-stub strategy (concrete, not generic advice):**
 
@@ -242,19 +242,19 @@ Both `d2p-finance/haskell-deepseek-plugin-sdk` and `JMSBPP/mamertomics-etl` were
 
 3. **Bump discipline:** because both upstreams are pre-API, the pinned commit should be re-checked (not blindly bumped) at the start of each phase that depends on new upstream surface — this is a natural, low-overhead checkpoint rather than a CI job, since both repos are private/early and a bot-driven bump would just fail silently against a moving pre-1.0 target.
 
-4. **kalecky is a THIRD implicit stub dependency** (not named as a direct dep in PROJECT.md, but load-bearing per Part 2/4): `kalecky-spec` today lives inside a hevm fork requiring `secp256k1`/`ff` C libraries (per `mamertomics-etl` PROJECT.md's own documented blocker) and has not yet been extracted into the standalone package both this project and the ETL need. **This project should not add a fourth dependency chain by importing kalecky directly before the ETL's Phase-0 extraction lands** — instead, the `GroundedValue`/kalecky-shaped fields in Part 4's data flow should be typed against a small **local vendored subset** (just `Unit`, `Currency`, `Valuation` phantom tags — no `Price`/`Wage` arithmetic needed for shock output, only for state representation inside `KaleckianKernel` if the team chooses the phantom-tagged `KaleckianState` from Part 3) until the standalone `kalecky` package exists, then swap the import.
+4. **kalecky is a THIRD implicit stub dependency** (not named as a direct dep in PROJECT.md, but load-bearing per Part 2/4): `kalecky-spec` today lives inside a hevm fork requiring `secp256k1`/`ff` C libraries (per the data resource PROJECT.md's own documented blocker) and has not yet been extracted into the standalone package both this project and the ETL need. **This project should not add a fourth dependency chain by importing kalecky directly before the ETL's Phase-0 extraction lands** — instead, the `GroundedValue`/kalecky-shaped fields in Part 4's data flow should be typed against a small **local vendored subset** (just `Unit`, `Currency`, `Valuation` phantom tags — no `Price`/`Wage` arithmetic needed for shock output, only for state representation inside `KaleckianKernel` if the team chooses the phantom-tagged `KaleckianState` from Part 3) until the standalone `kalecky` package exists, then swap the import.
 
 ## Part 6 — Suggested Build Order
 
-Ordered by which components can be built and tested with zero real upstream dependency, deferring anything that needs a working `haskell-deepseek-plugin-sdk` or live `mamertomics-etl` staging schema as late as possible:
+Ordered by which components can be built and tested with zero real upstream dependency, deferring anything that needs a working `haskell-deepseek-plugin-sdk` or live the data resource staging schema as late as possible:
 
 1. **Shock/claim vocabulary** — vendor or reuse `Mamertomics.Core.Shock`/`TheoryGraph`-shaped ADTs (Part 2), scoped to Sarmiento's claim classes; Aeson codecs; property tests on round-trips and claim→shock sign-convention invariants (an explicit PROJECT.md requirement) — **zero external dependency, buildable and testable on day one.**
 2. **`KaleckianKernel` typed interface + `Sarmiento` instance** (Part 3) — pure functions, no I/O, testable against hand-constructed `KaleckianState`/`KaleckianParams` fixtures — **zero external dependency.**
 3. **Local kalecky-subset vendoring** (Part 5, point 4) — the minimal phantom-tag types needed for `KaleckianState`'s fields, swappable later for the real standalone package.
-4. **`StagingContract` + local Postgres fixture** (Part 5, point 2) — the Data-Grounding interface and its fake implementation; Claim→Shock Translator built and tested against the fixture, never the live Supabase project, until mamertomics-etl exposes a real API.
+4. **`StagingContract` + local Postgres fixture** (Part 5, point 2) — the Data-Grounding interface and its fake implementation; Claim→Shock Translator built and tested against the fixture, never the live Supabase project, until the data resource exposes a real API.
 5. **`ClientContract` + fake harness runtime** (Part 5, point 1) — the Protocol Adapter interface and its fake implementation, ported from `dsh-sdk-client`'s own `tests/fake-runtime.ts` pattern; this is the component most exposed to upstream churn (developer-preview, breaking changes declared), so keeping it behind an interface with a fake is the highest-leverage decoupling point in the whole project.
 6. **Wire the four components together** behind the two contract interfaces (still using fakes) — end-to-end claim-in/shock-out test, no live dependencies.
-7. **Swap the `StagingContract` fixture for the real `mamertomics-etl` client** once the ETL's JSON-RPC daemon or exposed types exist — this is gated on the ETL's own roadmap, not on this project's internal work.
+7. **Swap the `StagingContract` fixture for the real the data resource client** once the ETL's JSON-RPC daemon or exposed types exist — this is gated on the ETL's own roadmap, not on this project's internal work.
 8. **Swap the `ClientContract` fake for the real `haskell-deepseek-plugin-sdk`** once upstream grows a library section — gated on `d2p-finance`'s own roadmap.
 9. **CI on the private repo** (build + tests) — deferred until steps 1-6 are stable, since CI against two moving pinned-commit dependencies before their APIs stabilize will be noisy without earning anything.
 
@@ -270,8 +270,8 @@ This ordering directly serves PROJECT.md's own "Active" requirement list: the co
 - `/home/jmsbpp/mamertomics-monorepo/src/mamertomics-core/src/Mamertomics/Core/{Provenance,DataPoint,Series,Shock,Basis,Scale,Dimension,TheoryGraph,Markup}.hs` — existing claim/shock/provenance/dimensional-safety ADT layer (HIGH confidence, primary source, read directly)
 - `/home/jmsbpp/learning/kalecky-semantics/kalecky-spec/src/Kalecky/Types/{Units/Unit,Currency,Measure,Valuation,Prices/Wage,Prices/Price}.hs` and `Kalecky/Operators/{GrowthRate,Gap}.hs` — value-type layer, phantom-tag discipline, gap in negative/index/USD representation (HIGH confidence, primary source, read directly)
 - `/home/jmsbpp/mamertomics/sarmiento-plugins/.planning/PROJECT.md` — project scope, constraints, key decisions (HIGH confidence, primary source)
-- `/home/jmsbpp/mamertomics-etl/.planning/PROJECT.md` — ETL's staging schema, kalecky-extraction blocker, `dim_status` gap documentation (HIGH confidence, primary source)
-- `~/ai-agents/haskell-deepseek-plugin-sdk` and `~/mamertomics-etl` repo trees — confirmed bare `stack new` scaffolds as of 2026-08-25 (HIGH confidence, verified directly via `find`)
+- `/home/jmsbpp/the data resource/.planning/PROJECT.md` — ETL's staging schema, kalecky-extraction blocker, `dim_status` gap documentation (HIGH confidence, primary source)
+- `~/ai-agents/haskell-deepseek-plugin-sdk` and `~/the data resource` repo trees — confirmed bare `stack new` scaffolds as of 2026-08-25 (HIGH confidence, verified directly via `find`)
 
 ---
 *Architecture research for: Haskell out-of-process DeepSeek Harness plugin + typed Kaleckian domain kernel*

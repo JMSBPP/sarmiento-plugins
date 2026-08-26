@@ -2,7 +2,7 @@
 phase: 02-dependency-wiring
 plan: 02
 subsystem: docs
-tags: [readme, changelog, stack, dependency-discipline, kalecky-semantics, mamertomics-etl, haskell-deepseek-plugin-sdk]
+tags: [readme, changelog, stack, dependency-discipline, kalecky-semantics, the data resource, haskell-deepseek-plugin-sdk]
 
 requires:
   - phase: 02-dependency-wiring
@@ -15,7 +15,7 @@ provides:
   - "CHANGELOG.md Unreleased/Added + Unreleased/Fixed entries recording the Phase 2 wiring and the visibility correction"
   - "Confirmed clean Phase 2 exit gate: stack --lock-file error-on-write build, stack test, check-no-local-dimensional-types.sh all green, no lockfile drift"
 affects:
-  - "03-ci (Phase 3): CI-02 needs to know only mamertomics-etl requires token auth; CI-03's drift check is the same `stack --lock-file error-on-write build` command this README now documents"
+  - "03-ci (Phase 3): CI-02 needs to know only the data resource requires token auth; CI-03's drift check is the same `stack --lock-file error-on-write build` command this README now documents"
 
 tech-stack:
   added: []
@@ -127,9 +127,9 @@ _No plan-metadata commit yet — this SUMMARY.md, STATE.md, and ROADMAP.md are c
 **2. [Rule 1 - Bug] Stale "Phase 2" forward-reference in README's Snapshot section**
 - **Found during:** Task 1, final scan for leftover Phase 1 status language
 - **Issue:** The Snapshot section still said "...zero cross-compiler friction when
-  `mamertomics-etl` is added as a git dependency in Phase 2" — Phase 2 is the phase currently
+  the data resource is added as a git dependency in Phase 2" — Phase 2 is the phase currently
   executing/completing, so this described a future event that has already happened.
-- **Fix:** Reworded to "...now that `mamertomics-etl` is wired in as a pinned git
+- **Fix:** Reworded to "...now that the data resource is wired in as a pinned git
   dependency", matching present tense used throughout the rest of the rewritten sections.
 - **Files modified:** `README.md`
 - **Commit:** `f68bdb9`
@@ -163,9 +163,9 @@ Task 2 (CHANGELOG + phase gate):
 
 ## For Phase 3 (CI) — as requested by this plan's `<output>` spec
 
-- **Confirmed visibility:** `kalecky-semantics` (JMSBPP) — public. `mamertomics-etl`
+- **Confirmed visibility:** `kalecky-semantics` (JMSBPP) — public. the data resource
   (JMSBPP) — **private, needs token auth in CI**. `haskell-deepseek-plugin-sdk`
-  (d2p-finance) — public. Only `mamertomics-etl` needs the scoped-token
+  (d2p-finance) — public. Only the data resource needs the scoped-token
   `insteadOf` rewrite CI-02 will configure.
 - **Drift-check command README now documents:** `stack --lock-file error-on-write build`
   (same command exercised live in this plan's Task 2 phase gate).

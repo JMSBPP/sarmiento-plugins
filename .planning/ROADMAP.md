@@ -2,7 +2,7 @@
 
 ## Overview
 
-v1 lays the foundation only: a buildable, CI-verified Haskell Stack project wired to its three upstream dependencies (`mamertomics-etl`, `haskell-deepseek-plugin-sdk`, `kalecky-semantics`). The claim/shock translation, protocol adapter, and data grounding are all v2, deferred until those upstreams expose real APIs. The journey is Scaffold (a fresh clone builds and tests) → Dependency Wiring (the three pinned git extra-deps resolve and are importable) → CI (every push/PR is automatically verified, including the private-repo auth path), ending with a green run on `main`.
+v1 lays the foundation only: a buildable, CI-verified Haskell Stack project wired to its three upstream dependencies (the data resource, `haskell-deepseek-plugin-sdk`, `kalecky-semantics`). The claim/shock translation, protocol adapter, and data grounding are all v2, deferred until those upstreams expose real APIs. The journey is Scaffold (a fresh clone builds and tests) → Dependency Wiring (the three pinned git extra-deps resolve and are importable) → CI (every push/PR is automatically verified, including the private-repo auth path), ending with a green run on `main`.
 
 ## Phases
 
@@ -34,11 +34,11 @@ Plans:
 - [ ] 01-02-PLAN.md — Buildable Stack project on lts-24.56: `stack.yaml` snapshot pin, hpack `package.yaml` (library + test-suite, sibling warning set), `Sarmiento.Plugin` module, `src/Education/` placeholder, tasty + QuickCheck smoke suite, fresh-clone build proof — SCAF-01, SCAF-02, SCAF-04
 
 ### Phase 2: Dependency Wiring
-**Goal**: The project is wired to its three pinned upstream git extra-deps (`mamertomics-etl`, `haskell-deepseek-plugin-sdk`, `kalecky-semantics`), each either importable or documented as executable-only, with the pin/bump discipline recorded.
+**Goal**: The project is wired to its three pinned upstream git extra-deps (the data resource, `haskell-deepseek-plugin-sdk`, `kalecky-semantics`), each either importable or documented as executable-only, with the pin/bump discipline recorded.
 **Depends on**: Phase 1
 **Requirements**: DEPS-01, DEPS-02, DEPS-03, DEPS-04
 **Success Criteria** (what must be TRUE):
-  1. `stack.yaml` declares git extra-deps pinned by commit for `JMSBPP/mamertomics-etl` (private) and `d2p-finance/haskell-deepseek-plugin-sdk` (public); `stack.yaml.lock` is committed
+  1. `stack.yaml` declares git extra-deps pinned by commit for the data resource (HTTP pointer, v2) (private) and `d2p-finance/haskell-deepseek-plugin-sdk` (public); `stack.yaml.lock` is committed
   2. `stack.yaml` declares `JMSBPP/kalecky-semantics` as a pinned git extra-dep and `package.yaml` depends on it so `Kalecky.Types.*` are importable — no local dimensional types are defined anywhere in the project
   3. README documents each dependency's role in a table (owner, visibility, pinned commit, why), stating the "bump deliberately, never track a branch" rule
   4. A module compiles importing at least one symbol from each of the three deps — or, for a dep with no library surface yet, a documented note explains it is executable-only until upstream exposes one; either way `stack build` succeeds end to end
@@ -54,7 +54,7 @@ Plans:
 **Requirements**: CI-01, CI-02, CI-03, CI-04
 **Success Criteria** (what must be TRUE):
   1. A GitHub Actions workflow runs `stack build --test --no-run-tests` then `stack test` on ubuntu for `push`/`pull_request`, with Stack + `~/.stack` caching keyed on `stack.yaml.lock`
-  2. CI fetches the private `JMSBPP/mamertomics-etl` extra-dep via a scoped token injected through `git config url.insteadOf` (token stored only in repo secrets); the public `d2p-finance` dep fetches without auth
+  2. CI fetches the private the data resource (HTTP pointer, v2) extra-dep via a scoped token injected through `git config url.insteadOf` (token stored only in repo secrets); the public `d2p-finance` dep fetches without auth
   3. CI fails loudly (not silently re-resolving) if `stack.yaml.lock` is out of date with `stack.yaml`
   4. A green CI run exists on `main` after the scaffold lands, observable via `gh run list`
 **Plans**: TBD

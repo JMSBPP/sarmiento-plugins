@@ -1,6 +1,6 @@
 # Feature Research
 
-**Domain:** DeepSeek Harness (Cordis) contained-agent plugin that translates Eduardo Sarmiento's Colombian structuralist/Post-Keynesian claims into Kaleckian macro shocks grounded in `mamertomics-db`
+**Domain:** DeepSeek Harness (Cordis) contained-agent plugin that translates Eduardo Sarmiento's Colombian structuralist/Post-Keynesian claims into Kaleckian macro shocks grounded in the macro data resource
 **Researched:** 2026-08-25
 **Confidence:** MEDIUM-HIGH (harness surface: HIGH, read directly from `deepseek-harness` docs/source/notes and the monorepo's GAMS bridge; economics claim taxonomy: MEDIUM, standard Post-Keynesian literature synthesized against training data and lightly web-verified; shock/scenario file-format conventions: MEDIUM-HIGH, Dynare verified via official manual, GAMS/SFC verified against this project's own existing `mamertomics-gams-bridge` code)
 
@@ -28,10 +28,10 @@ Users here are threefold: the harness process spawning this plugin as a child (`
 | Structured **shock output**: closed ADT + JSON codec, with `kalecky` units | Same reasoning, mirrored on the output side; the GAMS bridge's own `scenario_scalars` are exactly this shape (named parameter + typed value) | MEDIUM | See "Shock output format" comparison below |
 | Every numeric output carries provenance: source series/observation ids, not just a number | `mamertomics-gams-bridge`'s `ManifestInput`/`ManifestWedge` and the `scenario-baseline-2023.json` fixture already do this for every single input and parameter (`source_observation_ids`, `derivation_note`, `effective_from`) — this is the established convention in the sibling codebase this plugin feeds | MEDIUM | Table stakes *because* the immediate downstream consumer already enforces it; a shock without provenance would be a regression relative to the existing pipeline |
 | Bands, not bare point estimates, when the underlying magnitude is uncertain | `ManifestWedge` carries `value`, `value_low`, `value_high` for every structural parameter (`a0`, `a1`, `g0`, `g1`, `g2`, `pi_anchor`, `tau_consumer`, `tau_producer`); `pi_anchor`'s own derivation note explicitly warns "NOT a statistical CI, NOT centered — consumers must not assume interiority" | MEDIUM | A shock schema that only carries `value_numeric` and drops the band silently loses information the existing closure treats as load-bearing |
-| Explicit `is_assumed`/`constructed` flags — never a silently interpolated or default number | `ManifestWedge.mwIsAssumed`, `ManifestInput.miConstructed`, and PROJECT.md's own constraint ("no hardcoded illustrative numeric literals — magnitudes come from `mamertomics-db` with provenance, or the work stops") converge on the same rule | LOW-MEDIUM | This is a hard constraint, already stated twice independently (project constraint + sibling code convention) |
+| Explicit `is_assumed`/`constructed` flags — never a silently interpolated or default number | `ManifestWedge.mwIsAssumed`, `ManifestInput.miConstructed`, and PROJECT.md's own constraint ("no hardcoded illustrative numeric literals — magnitudes come from the macro data resource with provenance, or the work stops") converge on the same rule | LOW-MEDIUM | This is a hard constraint, already stated twice independently (project constraint + sibling code convention) |
 | Fail-loud, refuse-partial when a claim cannot be grounded | `Mamertomics.Gams.Import.importSolve` refuses to import *anything* from a `NonOptimal` solve rather than landing partial results ("fail-loud/nothing-partial, per CONTEXT's standing doctrine") | LOW-MEDIUM | The plugin should mirror this: an unsupported or ungrounded claim is a typed error result, never a best-effort guess |
 | Deterministic, testable claim→shock mapping per supported claim class | PROJECT.md requirement; also matches Dynare/GAMS practice where a `.mod`/`.gms` scenario file is a deterministic function of its inputs, never a sampled or model-dependent guess | MEDIUM | Property tests on dimensional consistency and sign conventions are already scoped |
-| A single fixed, versioned dimensional/unit vocabulary (`kalecky`) shared end-to-end | The gams-bridge already treats units/valuation/dimension as first-class (`Mamertomics.Core.Dimension`, `EconomicDimension`, `ValueSpec`); PROJECT.md explicitly forbids forking "a third dimensional system" | MEDIUM | Both `mamertomics-etl` and this project must consume the same extracted `kalecky` package — a hard cross-project dependency, not optional |
+| A single fixed, versioned dimensional/unit vocabulary (`kalecky`) shared end-to-end | The gams-bridge already treats units/valuation/dimension as first-class (`Mamertomics.Core.Dimension`, `EconomicDimension`, `ValueSpec`); PROJECT.md explicitly forbids forking "a third dimensional system" | MEDIUM | Both the data resource and this project must consume the same extracted `kalecky` package — a hard cross-project dependency, not optional |
 
 ### Differentiators (Competitive Advantage)
 
@@ -42,7 +42,7 @@ There is no real "competitor" ecosystem for this exact plugin — the differenti
 | `KaleckianKernel`: a generic, typed model interface (state, parameters, closure) with country instances | Reusable formalization instead of "Sarmiento" being prose; the parameter *shape* already exists empirically in `mamertomics-gams-bridge`'s closure (`a0`, `a1`, `g0`, `g1`, `g2`, `pi_anchor`, `tau_consumer`, `tau_producer`, `s_band`) — the kernel's job is to abstract that shape so a second country instance is a new parameter *vector*, not new code | HIGH | This is the project's stated second goal; genericity should be validated by designing the interface so the existing Colombian closure is a special case, not by speculatively supporting a hypothetical second country |
 | Claim → data-query traceability: every shock documents *which* series/observation grounded its magnitude and *why* the claim maps to that parameter | No standard tool in the DSGE/Dynare/GAMS/SFC world connects a stated economic thesis to a specific parameter perturbation with a machine-checkable data query; shock files in that world are hand-authored by the modeler with the reasoning left in a comment at best | MEDIUM-HIGH | Directly extends the existing `derivation_note` convention from a per-parameter free-text field into a structured, testable claim→shock relation |
 | Dimensionally-typed claim AND shock ADTs sharing one unit system (`kalecky`) | Prevents the classic Dynare/GAMS failure mode of a scenario file silently mixing a percentage-point shock with a share-of-GDP shock on the same exogenous variable name; the type system catches it at compile time instead of at solve time | MEDIUM | Differentiator specifically *because* Dynare's `shocks` block and GAMS `Parameter` declarations carry no unit typing at all — units are tribal knowledge in the `.mod`/`.gms` file's comments |
-| Shock magnitude always derived from live `mamertomics-db` data, never a calibrated/illustrative literal | Standard Dynare/DSGE practice calibrates shock size from priors, historical SD, or literature values baked into the `.mod` file; standard GAMS scenario practice hand-edits `scenario_scalars.inc`. This plugin instead re-derives magnitude from the same staging schema the baseline itself came from, so a claim and the baseline it perturbs are provenance-consistent by construction | MEDIUM-HIGH | This is the "Core Value" line from PROJECT.md restated as a feature; its cost is that unsupported claim classes must be rejected rather than shipped with a placeholder |
+| Shock magnitude always derived from live the macro data resource data, never a calibrated/illustrative literal | Standard Dynare/DSGE practice calibrates shock size from priors, historical SD, or literature values baked into the `.mod` file; standard GAMS scenario practice hand-edits `scenario_scalars.inc`. This plugin instead re-derives magnitude from the same staging schema the baseline itself came from, so a claim and the baseline it perturbs are provenance-consistent by construction | MEDIUM-HIGH | This is the "Core Value" line from PROJECT.md restated as a feature; its cost is that unsupported claim classes must be rejected rather than shipped with a placeholder |
 | Formalization artefact (LaTeX/markdown) documenting the math ↔ type correspondence for each claim class | Makes the Kaleckian closure and Sarmiento's specific claims auditable by an economist who does not read Haskell, closing the loop between the typed kernel and the literature it claims to represent | MEDIUM | Not a runtime feature, but a differentiator relative to "prose-only" structuralist commentary, which is the actual status quo being replaced |
 | Property-based invariant tests across the whole claim→shock surface (dimensional consistency, sign conventions) | Dynare/GAMS scenario files have no equivalent test surface at all — a sign error in a `shocks` block is caught only by an economist noticing an implausible result post-solve | MEDIUM | Builds directly on the existing "no hardcoded illustrative literals" discipline; turns a review-time convention into a compile/test-time guarantee |
 
@@ -57,8 +57,8 @@ There is no real "competitor" ecosystem for this exact plugin — the differenti
 | Free-form / open-ended "explain any economist's claims" NLP layer with no closed claim taxonomy | Appears more general-purpose and future-proof | Makes "deterministic, testable translation" (a hard project requirement) impossible — an open-ended interpreter has no fixed invariant to test against, and it invites exactly the "illustrative numeric literal" failure the project constraints explicitly forbid | A closed ADT of supported claim classes (demand-regime, markup/distribution, external-constraint, productive-structure — see Kaleckian grounding below); a claim outside the closed set is a loud, typed rejection, and adding a new class is a deliberate code change with its own tests, not a runtime capability |
 | Session pooling / warm-child reuse across plugin invocations | Looks like an obvious performance win once the "fresh runtime process per run — no pooling" limitation is noticed in the SDK README | The SDK provider's own documented limitation states pooling is out of scope for the backend itself ("a harness runtime boots a full plugin tree, so per-run spawn cost is higher than the ACP backend's typical child" — accepted, not solved); building pooling inside this plugin would require reimplementing session/state isolation the harness itself does not provide across runs | Accept per-run spawn cost; if it becomes a real bottleneck, that is upstream `subagent-dsh-sdk` scope, not this plugin's |
 | Streaming intermediate claim-parsing/shock-construction steps into the parent's session log | Seems like good transparency/observability | The seam's own documented behavior is "only lifecycle + the final result surface" for out-of-process subagent providers — the parent log records just the delegation `tool/call`/`tool/result`, and the child's own transcript stays in the child's session root; fighting this to bridge intermediate state would go against the documented seam contract | Emit a complete, provenance-carrying shock as the one durable output; keep intermediate reasoning inside the child's own session/log, inspectable there if needed |
-| Countries other than Colombia in v1 | The generic `KaleckianKernel` naturally invites "why not add Brazil/Chile now, it's almost free" | PROJECT.md scopes this out explicitly; a second country instance without a second country's grounded data (from `mamertomics-etl`, which is Colombia-only) would force exactly the "illustrative literal" failure mode the whole project is designed to prevent | Keep the kernel generic in *type*, ship exactly one instance (Sarmiento/Colombia) backed by real data; a second country is a future consumer of the same interface, not v1 scope |
-| A parallel/competing dimensional-unit system for claims or shocks | Every new ADT needs *some* numeric representation, and it's tempting to define one locally for speed | PROJECT.md explicitly forbids forking a third dimensional system beyond `kalecky` and `mamertomics-core`; a locally-invented unit type would silently diverge from the one the GAMS bridge and `mamertomics-etl` already share | Depend on the extracted `kalecky` package transitively; if it lacks a needed unit, that is upstream scope in `kalecky-semantics`, not a local fork |
+| Countries other than Colombia in v1 | The generic `KaleckianKernel` naturally invites "why not add Brazil/Chile now, it's almost free" | PROJECT.md scopes this out explicitly; a second country instance without a second country's grounded data (from the data resource, which is Colombia-only) would force exactly the "illustrative literal" failure mode the whole project is designed to prevent | Keep the kernel generic in *type*, ship exactly one instance (Sarmiento/Colombia) backed by real data; a second country is a future consumer of the same interface, not v1 scope |
+| A parallel/competing dimensional-unit system for claims or shocks | Every new ADT needs *some* numeric representation, and it's tempting to define one locally for speed | PROJECT.md explicitly forbids forking a third dimensional system beyond `kalecky` and `mamertomics-core`; a locally-invented unit type would silently diverge from the one the GAMS bridge and the data resource already share | Depend on the extracted `kalecky` package transitively; if it lacks a needed unit, that is upstream scope in `kalecky-semantics`, not a local fork |
 | A Web UI or CLI beyond what's needed to run/test the plugin | Feels incomplete without a way to "see" the plugin working outside the harness | Explicitly out of scope in PROJECT.md; the harness (or a fake-runtime test harness) is already the intended surface | Test against a scripted fake harness runtime (the same pattern `subagent-dsh-sdk`'s own test suite uses: `tests/fake-runtime.ts`-equivalent) |
 
 ## Kaleckian claim taxonomy (grounds the "claim input" ADT)
@@ -88,7 +88,7 @@ This taxonomy is a **starting hypothesis for the requirements phase**, not a fin
 ## Feature Dependencies
 
 ```
-Extracted `kalecky` package (mamertomics-etl prerequisite)
+Extracted `kalecky` package (the data resource prerequisite)
     └──requires──> Typed claim ADT + JSON codec
     └──requires──> Typed shock ADT + JSON codec (units)
 
@@ -97,7 +97,7 @@ Typed shock ADT ──enables──> Claim→shock mapping (per claim class)
                                   └──requires──> KaleckianKernel parameter-vector definition
                                                      └──requires──> Sarmiento/Colombia instance
 
-mamertomics-db read API (mamertomics-etl staging schema) ──requires──> Grounded shock magnitudes
+the macro data resource read API (the data resource staging schema) ──requires──> Grounded shock magnitudes
                                                                             └──enables──> "no hardcoded literal" invariant tests
 
 JSON-RPC protocol conformance (initialize/session-prompt/session.event) ──requires──> Haskell SDK protocol types (d2p-finance, currently a scaffold)
@@ -112,8 +112,8 @@ Free-text claim/shock IO ──conflicts──> Deterministic, testable claim→
 
 ### Dependency Notes
 
-- **Typed claim/shock ADTs require the extracted `kalecky` package:** both PROJECT.md and `mamertomics-etl`'s own plan name this extraction as a Phase-0 gate; this plugin cannot define dimensionally-honest types before it lands, and must not fork a temporary substitute given the explicit "no third dimensional system" constraint.
-- **Grounded shock magnitudes require the `mamertomics-db` read API:** the ETL's staging schema is the only source of real Colombian series; until it exposes a stable read surface, claim classes that need live data cannot be implemented without violating the "no hardcoded illustrative literals" constraint — this is a hard external dependency, not a design choice.
+- **Typed claim/shock ADTs require the extracted `kalecky` package:** both PROJECT.md and the data resource's own plan name this extraction as a Phase-0 gate; this plugin cannot define dimensionally-honest types before it lands, and must not fork a temporary substitute given the explicit "no third dimensional system" constraint.
+- **Grounded shock magnitudes require the the macro data resource read API:** the ETL's staging schema is the only source of real Colombian series; until it exposes a stable read surface, claim classes that need live data cannot be implemented without violating the "no hardcoded illustrative literals" constraint — this is a hard external dependency, not a design choice.
 - **KaleckianKernel parameter-vector definition must precede claim→shock mapping implementation:** the mapping's output type *is* a perturbation of the kernel's parameter vector, so the vector's shape (informed by the existing GAMS-bridge closure: `a0`, `a1`, `g0`, `g1`, `g2`, `pi_anchor`, `tau_consumer`, `tau_producer`) has to be fixed first.
 - **Solving the model conflicts with the plugin's scope:** this is a hard boundary, not a soft preference — the GAMS bridge already owns solving, and blurring the line would duplicate tested solver logic and confuse where a wrong number came from (bad translation vs. bad solve).
 - **Free-text IO conflicts with determinism and testability:** these two requirements are structurally incompatible with each other; picking typed ADTs on both ends is what makes the property-test suite (an explicit project requirement) possible at all.
@@ -128,7 +128,7 @@ Minimum viable product — enough to validate that a claim really does become a 
 - [ ] One claim class end-to-end — markup/distribution is the strongest candidate since PROJECT.md already names its closure (`P = (1+m)·wL/Y`) and its target parameter (`pi_anchor`) already exists with a derivation note in the sibling GAMS bridge
 - [ ] Typed claim ADT + JSON codec (even if only one constructor is populated at launch, the type is closed and extensible by adding constructors, not by loosening the schema)
 - [ ] Typed shock ADT + JSON codec with `kalecky` units, band (`value_low`/`value_high`), and `is_assumed` flag
-- [ ] Read path into `mamertomics-db` staging schema for the one supported claim class's grounding data — no hardcoded literals
+- [ ] Read path into the macro data resource staging schema for the one supported claim class's grounding data — no hardcoded literals
 - [ ] `KaleckianKernel` skeleton (state/parameters/closure) with the Colombia/Sarmiento instance wired to the one supported claim class
 - [ ] Codec round-trip tests + at least one dimensional-consistency property test on the one supported mapping
 
@@ -140,7 +140,7 @@ Minimum viable product — enough to validate that a claim really does become a 
 
 ### Future Consideration (v2+)
 
-- [ ] A second country `KaleckianKernel` instance — defer until a second country's `mamertomics-etl`-equivalent data source exists; building it earlier would force illustrative literals
+- [ ] A second country `KaleckianKernel` instance — defer until a second country's the data resource-equivalent data source exists; building it earlier would force illustrative literals
 - [ ] Multi-period/path shocks (beyond the current single-scenario-year v1 scope) — defer until the GAMS bridge itself grows path-solving beyond its own current single-period v1 scope, since there is no consumer for a richer shock shape yet
 - [ ] Any richer bridging of intermediate claim-parsing steps into the parent session log — defer until/unless the harness's subagent seam itself grows a documented mechanism for it (currently explicitly out of scope for out-of-process providers)
 
@@ -151,7 +151,7 @@ Minimum viable product — enough to validate that a claim really does become a 
 | JSON-RPC protocol conformance | HIGH | MEDIUM | P1 |
 | Typed claim ADT + codec (one class) | HIGH | MEDIUM | P1 |
 | Typed shock ADT + codec (units, bands, assumed-flag) | HIGH | MEDIUM | P1 |
-| `mamertomics-db` grounded magnitudes (no literals) | HIGH | MEDIUM-HIGH | P1 |
+| the macro data resource grounded magnitudes (no literals) | HIGH | MEDIUM-HIGH | P1 |
 | `KaleckianKernel` skeleton + Colombia instance | HIGH | MEDIUM | P1 |
 | Codec round-trip + one property test | HIGH | LOW | P1 |
 | Remaining claim classes | MEDIUM-HIGH | MEDIUM per class | P2 |
@@ -185,7 +185,7 @@ Minimum viable product — enough to validate that a claim really does become a 
 
 **Project context (read directly):**
 - `/home/jmsbpp/mamertomics/sarmiento-plugins/.planning/PROJECT.md`
-- `/home/jmsbpp/mamertomics-etl/.planning/PROJECT.md`
+- `/home/jmsbpp/the data resource/.planning/PROJECT.md`
 - `/home/jmsbpp/mamertomics-monorepo/CLAUDE.md`
 
 **Web-verified (MEDIUM confidence):**

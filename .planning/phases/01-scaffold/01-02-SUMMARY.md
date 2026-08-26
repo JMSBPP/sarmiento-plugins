@@ -10,7 +10,7 @@ requires:
     provides: ".gitignore excluding build artefacts/credentials while keeping stack.yaml.lock and the .cabal file trackable; README.md and CHANGELOG.md that package.yaml's extra-source-files reference"
 provides:
   - "Stack project pinned to Stackage lts-24.56 (GHC 9.10.3) by immutable snapshot URL, extra-deps: [] (Phase 2 untouched)"
-  - "hpack package.yaml with library-in-src + test-suite-in-test layout, no executable stanza, ghc-options byte-identical to mamertomics-etl's warning set"
+  - "hpack package.yaml with library-in-src + test-suite-in-test layout, no executable stanza, ghc-options byte-identical to the data resource's warning set"
   - "src/Sarmiento/Plugin.hs — the library's sole module, exporting pluginName and pluginVersion, the compile-time link target for the test-suite and (later) Phase 2/CI"
   - "src/Education/README.md placeholder, proven harmless to hpack module discovery by a real build"
   - "test/Spec.hs — one tasty + QuickCheck smoke property whose subject is drawn from the library, compile-enforcing the test-suite -> library link"
@@ -21,7 +21,7 @@ affects: ["01-scaffold phase completion", "Phase 2 (Dependency Wiring) — extra
 tech-stack:
   added: ["stack 3.11.1", "GHC 9.10.3 (lts-24.56)", "hpack 0.39.6", "tasty 1.5.4", "tasty-quickcheck 0.11.1", "QuickCheck 2.15.0.1"]
   patterns:
-    - "Snapshot pinned by immutable URL (not bare name) so Stack never re-resolves it — mirrors mamertomics-etl"
+    - "Snapshot pinned by immutable URL (not bare name) so Stack never re-resolves it — mirrors the data resource"
     - "ghc-options warning set kept byte-identical across sibling repos so a module can move between them without a warning-flag surprise"
     - "Test-suite property built from a real library symbol (not base-only values) so a broken library link fails compilation, not just at runtime"
 
@@ -57,7 +57,7 @@ completed: 2026-08-25
 
 ## Accomplishments
 - `stack build` succeeds on Stackage `lts-24.56` (GHC 9.10.3), producing a library with exactly one module (`Sarmiento.Plugin`) and no warnings
-- `package.yaml`'s `ghc-options` block is byte-identical to `mamertomics-etl/package.yaml`'s nine-flag warning set, with no `-Werror` and no `executables:` stanza
+- `package.yaml`'s `ghc-options` block is byte-identical to `the data resource/package.yaml`'s nine-flag warning set, with no `-Werror` and no `executables:` stanza
 - `src/Education/README.md` proven harmless: a real build confirms it contributes no module to the generated `.cabal`
 - `stack test` runs one tasty + QuickCheck property (`reverse . reverse == id` over `pluginName <> suffix`) and reports `All 1 tests passed` — the property's subject is drawn from the library, so a broken `test-suite -> library` dependency would fail compilation, not just execution
 - A pristine copy of the tree (built via `git ls-files --cached --others --exclude-standard`, i.e. exactly what a clone would receive) builds and tests successfully from scratch with zero `stack.yaml.lock` drift, and the real working tree has no stray `.stack-work`, `.env`, or `.pem` files

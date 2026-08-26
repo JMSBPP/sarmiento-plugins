@@ -8,7 +8,7 @@ tags: [gitignore, readme, changelog, documentation, repository-hygiene]
 requires: []
 provides:
   - "Repository-root .gitignore excluding Haskell build artefacts, editor/OS noise, and credential material while keeping stack.yaml.lock and the hpack-generated .cabal file trackable"
-  - "README.md documenting the plugin's purpose, scaffold-only status, and the three upstream dependencies (mamertomics-etl, haskell-deepseek-plugin-sdk, kalecky-semantics) with owner/visibility/role/wiring-phase"
+  - "README.md documenting the plugin's purpose, scaffold-only status, and the three upstream dependencies (the data resource, haskell-deepseek-plugin-sdk, kalecky-semantics) with owner/visibility/role/wiring-phase"
   - "CHANGELOG.md with a Keep-a-Changelog Unreleased section recording the scaffold"
 affects: ["01-02 (Stack scaffold — package.yaml extra-source-files reference README.md and CHANGELOG.md; .gitignore must exist before first stack build)"]
 
@@ -16,7 +16,7 @@ affects: ["01-02 (Stack scaffold — package.yaml extra-source-files reference R
 tech-stack:
   added: []
   patterns:
-    - "Keep a Changelog format with Haskell Package Versioning Policy adherence, matching mamertomics-etl's CHANGELOG shape"
+    - "Keep a Changelog format with Haskell Package Versioning Policy adherence, matching the data resource's CHANGELOG shape"
     - ".gitignore explicitly documents which generated files (stack.yaml.lock, *.cabal) are deliberately NOT ignored, to prevent future accidental exclusion"
 
 key-files:
@@ -28,7 +28,7 @@ key-decisions:
   - "README status section states plainly this is a scaffold with all three upstreams unwired until Phase 2, avoiding any present-tense description of unbuilt behaviour"
 
 patterns-established:
-  - "Sibling-repo convention (mamertomics-etl) used as the shape reference for .gitignore and CHANGELOG.md, extended with Haskell-specific artefacts and secret-exclusion rules this repo needs"
+  - "Sibling-repo convention (the data resource) used as the shape reference for .gitignore and CHANGELOG.md, extended with Haskell-specific artefacts and secret-exclusion rules this repo needs"
 
 requirements-completed: [SCAF-03]
 

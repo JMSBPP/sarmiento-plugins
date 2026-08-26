@@ -6,20 +6,20 @@
 
 ## Summary
 
-All three upstream dependencies were tested empirically as Stack git extra-deps against `sarmiento-plugins`' real `lts-24.56` snapshot, using a scratch copy at a throwaway path (not the real repo — `stack.yaml`/`package.yaml` here were never modified). The two libraries (`kalecky-semantics`, `mamertomics-etl`) build and are importable with **zero** version-bound or resolver conflicts, despite each declaring a different snapshot in its own `stack.yaml` (`lts-23.28` and `lts-24.56` respectively — Stack ignores an extra-dep's own resolver and only uses the consumer's snapshot). The third (`haskell-deepseek-plugin-sdk`) has no library component at its true GitHub HEAD (verified live, not from the possibly-stale local clone) — declaring it in `package.yaml` `dependencies:` produces a hard, well-defined Stack error (`S-4804`, "is a library dependency, but the package provides no library"); it must be listed **only** in `stack.yaml` `extra-deps:`, never in `package.yaml`.
+All three upstream dependencies were tested empirically as Stack git extra-deps against `sarmiento-plugins`' real `lts-24.56` snapshot, using a scratch copy at a throwaway path (not the real repo — `stack.yaml`/`package.yaml` here were never modified). The two libraries (`kalecky-semantics`, the data resource) build and are importable with **zero** version-bound or resolver conflicts, despite each declaring a different snapshot in its own `stack.yaml` (`lts-23.28` and `lts-24.56` respectively — Stack ignores an extra-dep's own resolver and only uses the consumer's snapshot). The third (`haskell-deepseek-plugin-sdk`) has no library component at its true GitHub HEAD (verified live, not from the possibly-stale local clone) — declaring it in `package.yaml` `dependencies:` produces a hard, well-defined Stack error (`S-4804`, "is a library dependency, but the package provides no library"); it must be listed **only** in `stack.yaml` `extra-deps:`, never in `package.yaml`.
 
-The private repo (`mamertomics-etl`) cloned transparently on this machine via the existing `gh auth git-credential` helper over plain HTTPS — no SSH key, no `insteadOf` rewrite needed locally, and the same HTTPS URL form is what Phase 3's CI token injection will target. `stack --lock-file error-on-write build` is the exact, verified mechanism for CI-03 (fails loudly with exit code 1 and prints the would-be lock diff when `stack.yaml.lock` is stale; exits 0 silently when in sync) — this is directly reusable in Phase 3 and worth wiring into Phase 2's own verification.
+The private repo (the data resource) cloned transparently on this machine via the existing `gh auth git-credential` helper over plain HTTPS — no SSH key, no `insteadOf` rewrite needed locally, and the same HTTPS URL form is what Phase 3's CI token injection will target. `stack --lock-file error-on-write build` is the exact, verified mechanism for CI-03 (fails loudly with exit code 1 and prints the would-be lock diff when `stack.yaml.lock` is stale; exits 0 silently when in sync) — this is directly reusable in Phase 3 and worth wiring into Phase 2's own verification.
 
-One correction to the existing README's dependency table: `kalecky-semantics` is **public** on GitHub (verified via `gh repo view --json visibility` → `PUBLIC`), not private as currently documented. `mamertomics-etl` is the only genuinely private repo among the three (verified `private: true`).
+One correction to the existing README's dependency table: `kalecky-semantics` is **public** on GitHub (verified via `gh repo view --json visibility` → `PUBLIC`), not private as currently documented. the data resource is the only genuinely private repo among the three (verified `private: true`).
 
-**Primary recommendation:** Pin all three extra-deps by the exact commit SHAs verified below, add `kalecky-semantics` and `mamertomics-etl` to `package.yaml` `dependencies:` with a real imported symbol each, leave `haskell-deepseek-plugin-sdk` in `extra-deps:` only with a documented executable-only note (no import possible), and gate Phase 2's own verification on `stack --lock-file error-on-write build` succeeding.
+**Primary recommendation:** Pin all three extra-deps by the exact commit SHAs verified below, add `kalecky-semantics` and the data resource to `package.yaml` `dependencies:` with a real imported symbol each, leave `haskell-deepseek-plugin-sdk` in `extra-deps:` only with a documented executable-only note (no import possible), and gate Phase 2's own verification on `stack --lock-file error-on-write build` succeeding.
 
 <phase_requirements>
 ## Phase Requirements
 
 | ID | Description | Research Support |
 |----|-------------|-------------------|
-| DEPS-01 | `stack.yaml` declares git extra-deps pinned by commit for `mamertomics-etl` (private) and `haskell-deepseek-plugin-sdk` (public); `stack.yaml.lock` committed | Verified commit SHAs, verified HTTPS clone works with existing `gh` credential helper (no CI-only mechanism needed locally), verified exact `stack.yaml.lock` shape Stack writes for git extra-deps |
+| DEPS-01 | `stack.yaml` declares git extra-deps pinned by commit for the data resource (private) and `haskell-deepseek-plugin-sdk` (public); `stack.yaml.lock` committed | Verified commit SHAs, verified HTTPS clone works with existing `gh` credential helper (no CI-only mechanism needed locally), verified exact `stack.yaml.lock` shape Stack writes for git extra-deps |
 | DEPS-02 | `stack.yaml` declares `kalecky-semantics` as pinned git extra-dep, `package.yaml` depends on it, `Kalecky.Types.*` importable, no local dimensional types | Verified `kalecky-semantics` builds clean on lts-24.56 from its own lts-23.28 pin; verified exact list of currently-exposed `Kalecky.Types.*`/`Kalecky.Operators.*`/`Kalecky.Equations.*` modules (not all files in `src/` are exposed) |
 | DEPS-03 | Each dep's role + "bump deliberately, never track a branch" documented in README dependency table | Verified true visibility of all three repos (corrects README's `kalecky-semantics` = private → actually public); verified true GitHub HEAD SHAs for the pin table |
 | DEPS-04 | Compile-time proof importing a symbol from each dep, or documented executable-only note for stubless deps; `stack build` succeeds end to end | Verified exact Stack error when a library-less extra-dep is added to `dependencies:` (`S-4804`); verified `stack build` succeeds with all three in `extra-deps:` and only the two libraries in `dependencies:`; verified concrete importable symbols from each library |
@@ -36,10 +36,10 @@ All tests ran in a scratch copy at `/tmp/.../scratchpad/deps-probe` (copied from
 | Extra-dep | Repo | Visibility (verified live) | True GitHub HEAD (verified live) | Has library? | Verified importable symbol |
 |-----------|------|------------------------------|-----------------------------------|---------------|------------------------------|
 | `kalecky-semantics` | `JMSBPP/kalecky-semantics` | **public** (`gh repo view` → `PUBLIC`) — README currently says "private", this is wrong | `cd6778e2d39c5eb30549d8ff87459b5644cc18fc` (2026-08-25T19:01:29Z) — matches local clone at `/home/jmsbpp/learning/kalecky-semantics`, no drift | Yes — `library` stanza, 20 `exposed-modules` | `Kalecky.Types.Units.Unit (Unit)` (built successfully) |
-| `mamertomics-etl` | `JMSBPP/mamertomics-etl` | **private** (`gh repo view` → confirmed `private: true`) | `c8b45ac159553017df82c4258af3d2bf68b5f62e` (2026-08-25T19:31:39Z) — matches local clone, no drift | Yes — hpack-generated, exposes `Lib` only | `Lib (someFunc)` (built successfully) |
+| the data resource | the data resource (HTTP pointer, v2) | **private** (`gh repo view` → confirmed `private: true`) | `<removed>` (2026-08-25T19:31:39Z) — matches local clone, no drift | Yes — hpack-generated, exposes `Lib` only | `Lib (someFunc)` (built successfully) |
 | `haskell-deepseek-plugin-sdk` | `d2p-finance/haskell-deepseek-plugin-sdk` | **public** (matches README) | `de98b6c2c4a49aa9893730fd0c6eee3d489a9a24` (2026-08-25T19:03:41Z) — **local clone at `/home/jmsbpp/ai-agents/haskell-deepseek-plugin-sdk` was behind** (`bd66ebe0...`); diffed the two commits and confirmed the drift is `.planning/` docs only — `src/`, `.cabal`, `stack.yaml` are byte-identical, so the "executable-only, no library" finding below holds at the true current HEAD too | **No** — single `executable` stanza only, no `library` stanza | None possible — see DEPS-04 finding below |
 
-None of the three had any `base` version-bound conflict with GHC 9.10.3 / `base-4.20.2.0` (verified: `stack exec ghc-pkg -- list base` inside the scratch project → `base-4.20.2.0`). `kalecky-semantics` declares `base >= 4.19 && < 5`; both `mamertomics-etl` and the SDK declare `base >= 4.7 && < 5`. All satisfy 4.20.2.0.
+None of the three had any `base` version-bound conflict with GHC 9.10.3 / `base-4.20.2.0` (verified: `stack exec ghc-pkg -- list base` inside the scratch project → `base-4.20.2.0`). `kalecky-semantics` declares `base >= 4.19 && < 5`; both the data resource and the SDK declare `base >= 4.7 && < 5`. All satisfy 4.20.2.0.
 
 **`kalecky-semantics` has zero non-`base` dependencies.** This corrects the project-level `.planning/research/STACK.md`, which anticipated `optics-core`/`optics-th`/`aeson-optics` coupling based on an earlier fork (`kalecky-spec` inside a hevm fork). The current standalone `kalecky-semantics.cabal` (verified by direct read) has `build-depends: base >= 4.19 && < 5` only, in both the `library` and `test-suite` stanzas (test-suite additionally needs `QuickCheck`, `quickcheck-classes`, `tasty`, `tasty-hunit`, `tasty-quickcheck`, none of which are pulled transitively into `sarmiento-plugins` since it only depends on the library). `Kalecky.Types.Units.Unit`'s `Unit` type is exported abstractly (constructor hidden; `unit`/`qty`/`value`/`add`/`align`/`scaleBy` are the only public operations) — importing bare `Unit` as a type is sufficient and requires no `HasScale` instance to compile.
 
@@ -82,8 +82,8 @@ packages:
 extra-deps:
 - git: https://github.com/JMSBPP/kalecky-semantics.git
   commit: cd6778e2d39c5eb30549d8ff87459b5644cc18fc
-- git: https://github.com/JMSBPP/mamertomics-etl.git
-  commit: c8b45ac159553017df82c4258af3d2bf68b5f62e
+- git: <data-resource-url>
+  commit: <removed>
 - git: https://github.com/d2p-finance/haskell-deepseek-plugin-sdk.git
   commit: de98b6c2c4a49aa9893730fd0c6eee3d489a9a24
 ```
@@ -96,7 +96,7 @@ No `subdirs:` needed for any of the three — each is a single-package repo at i
 dependencies:
 - base >= 4.7 && < 5
 - kalecky-semantics
-- mamertomics-etl
+- the data resource
 # haskell-deepseek-plugin-sdk deliberately NOT listed here — see DEPS-04 finding
 ```
 
@@ -169,7 +169,7 @@ snapshots:
 credential.https://github.com.helper !/usr/bin/gh auth git-credential
 credential.https://gist.github.com.helper !/usr/bin/gh auth git-credential
 ```
-No `url.insteadOf` rewrite is configured or needed locally. `git clone https://github.com/JMSBPP/mamertomics-etl.git` (plain HTTPS, no token in the URL) succeeded directly, and `stack build` with `mamertomics-etl` as a git extra-dep over HTTPS cloned and built it without any prompt or failure — Stack shells out to the same `git` binary, so it transparently inherits the `gh`-managed credential helper. **Use the plain `https://github.com/...` form in `stack.yaml`** (not `git@github.com:...`), because that is exactly the form Phase 3's `git config url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"` CI pattern rewrites — using SSH locally would require a second, CI-incompatible form to be documented and kept in sync.
+No `url.insteadOf` rewrite is configured or needed locally. `git clone <data-resource-url>` (plain HTTPS, no token in the URL) succeeded directly, and `stack build` with the data resource as a git extra-dep over HTTPS cloned and built it without any prompt or failure — Stack shells out to the same `git` binary, so it transparently inherits the `gh`-managed credential helper. **Use the plain `https://github.com/...` form in `stack.yaml`** (not `git@github.com:...`), because that is exactly the form Phase 3's `git config url."https://x-access-token:${TOKEN}@github.com/".insteadOf "https://github.com/"` CI pattern rewrites — using SSH locally would require a second, CI-incompatible form to be documented and kept in sync.
 
 ## Don't Hand-Roll
 
@@ -199,7 +199,7 @@ No `url.insteadOf` rewrite is configured or needed locally. `git clone https://g
 ### Pitfall 4: README's dependency table currently mis-states `kalecky-semantics` as "private"
 
 **What goes wrong:** DEPS-03 requires documenting each dep's visibility. If the existing README wording is copied forward unchanged, it will state something the empirical check contradicts (`gh repo view JMSBPP/kalecky-semantics --json visibility` → `PUBLIC`).
-**How to avoid:** Correct the table when DEPS-03 lands: `kalecky-semantics` = public. Only `mamertomics-etl` is genuinely private among the three (confirmed `private: true`). This also simplifies CI-02's later scope: only one repo (`mamertomics-etl`) needs token-based auth; both public repos fetch without credentials in CI just as they did here without any explicit config.
+**How to avoid:** Correct the table when DEPS-03 lands: `kalecky-semantics` = public. Only the data resource is genuinely private among the three (confirmed `private: true`). This also simplifies CI-02's later scope: only one repo (the data resource) needs token-based auth; both public repos fetch without credentials in CI just as they did here without any explicit config.
 
 ## Code Examples
 
@@ -219,7 +219,7 @@ import qualified Lib
 -- | Compile-time proof that kalecky-semantics resolves and is importable.
 type KaleckyUnitProof basis = Unit basis
 
--- | Compile-time proof that mamertomics-etl resolves and is importable.
+-- | Compile-time proof that the data resource resolves and is importable.
 etlSomeFunc :: IO ()
 etlSomeFunc = Lib.someFunc
 
@@ -230,7 +230,7 @@ pluginVersion :: String
 pluginVersion = "0.1.0.0"
 ```
 
-`stack build` output for this module (trimmed): `kalecky-semantics> ... Building library ... [21 of 21] Compiling Kalecky.Equations.WageSetting`, then `mamertomics-etl > ... [1 of 2] Compiling Lib`, then `sarmiento-plugins> ... [2 of 2] Compiling Sarmiento.Plugin`, then `Completed 3 action(s).` — full end-to-end success, no warnings beyond the pre-existing scratch-copy artefact (`CHANGELOG.md` missing, an artifact of the scratch copy, not a real finding).
+`stack build` output for this module (trimmed): `kalecky-semantics> ... Building library ... [21 of 21] Compiling Kalecky.Equations.WageSetting`, then `the data resource > ... [1 of 2] Compiling Lib`, then `sarmiento-plugins> ... [2 of 2] Compiling Sarmiento.Plugin`, then `Completed 3 action(s).` — full end-to-end success, no warnings beyond the pre-existing scratch-copy artefact (`CHANGELOG.md` missing, an artifact of the scratch copy, not a real finding).
 
 `stack test` also passed cleanly against this same wiring (existing smoke test unaffected, `All 1 tests passed`).
 
@@ -270,7 +270,7 @@ pluginVersion = "0.1.0.0"
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|---------------------|--------------|
-| DEPS-01 | `stack.yaml` extra-deps pinned by commit for `mamertomics-etl` + SDK; lock committed | build/compile | `stack --lock-file error-on-write build` | ✅ (existing `stack.yaml`/`stack.yaml.lock`, edited in-place) |
+| DEPS-01 | `stack.yaml` extra-deps pinned by commit for the data resource + SDK; lock committed | build/compile | `stack --lock-file error-on-write build` | ✅ (existing `stack.yaml`/`stack.yaml.lock`, edited in-place) |
 | DEPS-02 | `kalecky-semantics` extra-dep + `package.yaml` dependency; `Kalecky.Types.*` importable; no local dimensional types | build/compile + grep | `stack build` succeeds; `grep -rn 'newtype\|data' src/ \| grep -vi -E 'Sarmiento\.Plugin'` manually reviewed for accidental local unit types (no automated negative-grep test exists yet — Wave 0 gap below) | ⚠️ Wave 0 — no existing grep-based check |
 | DEPS-03 | README dependency table documents role/visibility/pin/why per dep | manual doc review | none (documentation requirement, not code) | N/A |
 | DEPS-04 | Compile-time proof module imports a symbol from each importable dep; executable-only dep documented; `stack build` succeeds end-to-end | build/compile | `stack build` (the proof module compiling *is* the test) | ✅ `src/Sarmiento/Plugin.hs` exists (Phase 1), edited in place for Phase 2 |
@@ -290,10 +290,10 @@ pluginVersion = "0.1.0.0"
 
 ### Primary (HIGH confidence — empirically verified this session)
 - Live `stack build`/`stack test` runs against all three pinned commits in a scratch copy — full logs captured above
-- `gh api repos/JMSBPP/mamertomics-etl/commits/HEAD`, `repos/JMSBPP/kalecky-semantics/commits/HEAD`, `repos/d2p-finance/haskell-deepseek-plugin-sdk/commits/HEAD` — live SHA + timestamp verification
+- `gh api repos/the data resource/commits/HEAD`, `repos/JMSBPP/kalecky-semantics/commits/HEAD`, `repos/d2p-finance/haskell-deepseek-plugin-sdk/commits/HEAD` — live SHA + timestamp verification
 - `gh repo view <repo> --json visibility,isPrivate` for all three repos — live visibility verification
-- Direct read of `kalecky-semantics.cabal`, `mamertomics-etl.cabal`/`package.yaml`, `haskell-deepseek-plugin-sdk.cabal` at their pinned commits (local clones, cross-checked against true GitHub HEAD via `git diff HEAD origin/main`)
-- `git config --global --get-regexp 'credential|url.*insteadof'` and a live `git clone https://github.com/JMSBPP/mamertomics-etl.git` — verified local private-repo auth path
+- Direct read of `kalecky-semantics.cabal`, `the data resource.cabal`/`package.yaml`, `haskell-deepseek-plugin-sdk.cabal` at their pinned commits (local clones, cross-checked against true GitHub HEAD via `git diff HEAD origin/main`)
+- `git config --global --get-regexp 'credential|url.*insteadof'` and a live `git clone <data-resource-url>` — verified local private-repo auth path
 - `stack --lock-file error-on-write build` run twice (stale lock → `S-1353`/exit 1; in-sync lock → exit 0) — verified drift-detection mechanism
 - `stack exec ghc-pkg -- list base` inside the scratch project — verified `base-4.20.2.0` for GHC 9.10.3/lts-24.56
 
@@ -308,4 +308,4 @@ pluginVersion = "0.1.0.0"
 - Pitfalls: HIGH — each pitfall was actually triggered and its exact error message recorded, except Pitfall 3 (local-clone staleness) which is HIGH by direct `git diff` comparison
 
 **Research date:** 2026-08-25
-**Valid until:** Short — 3-7 days. Two of the three upstreams (`mamertomics-etl`, `haskell-deepseek-plugin-sdk`) are being actively developed in parallel by the same author per `.planning/STATE.md`'s own blocker note; re-verify commit SHAs and library-stanza presence immediately before the plan is executed, not from this document alone.
+**Valid until:** Short — 3-7 days. Two of the three upstreams (the data resource, `haskell-deepseek-plugin-sdk`) are being actively developed in parallel by the same author per `.planning/STATE.md`'s own blocker note; re-verify commit SHAs and library-stanza presence immediately before the plan is executed, not from this document alone.

@@ -8,8 +8,8 @@
 -- of a placeholder that passes vacuously.
 --
 -- Since Phase 2 the suite also imports 'Sarmiento.Upstream', which in turn imports a symbol
--- from each of the two upstream libraries. That makes a broken dependency edge a compile
--- error in this very file, not a silently absent test.
+-- from the upstream type library. That makes a broken dependency edge a compile error in
+-- this very file, not a silently absent test.
 module Main (main) where
 
 import Sarmiento.Plugin (pluginName)
@@ -38,8 +38,8 @@ prop_reverseInvolutive suffix = reverse (reverse subject) === subject
     subject = pluginName <> suffix
 
 -- | The same involution, with its subject drawn from 'upstreamProofTag'. The assertion is
--- not the point; the import is. 'Sarmiento.Upstream' only compiles when both upstream
--- library edges resolve, so this property cannot even be built against a broken pin.
+-- not the point; the import is. 'Sarmiento.Upstream' only compiles when the upstream
+-- library edge resolves, so this property cannot even be built against a broken pin.
 prop_upstreamLinked :: String -> Property
 prop_upstreamLinked suffix = reverse (reverse subject) === subject
   where

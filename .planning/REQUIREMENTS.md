@@ -1,7 +1,7 @@
 # Requirements: sarmiento-plugins
 
 **Defined:** 2026-08-25
-**Core Value:** A Sarmiento claim goes in, a dimensionally-typed Kaleckian shock grounded in real `mamertomics-db` data comes out — through the harness plugin protocol, with every number carrying provenance and units. (v1 lays the foundation: a buildable, CI-verified Stack project wired to its upstreams; the translation itself is v2, gated on those upstreams.)
+**Core Value:** A Sarmiento claim goes in, a dimensionally-typed Kaleckian shock grounded in real the macro data resource data comes out — through the harness plugin protocol, with every number carrying provenance and units. (v1 lays the foundation: a buildable, CI-verified Stack project wired to its upstreams; the translation itself is v2, gated on those upstreams.)
 
 ## v1 Requirements
 
@@ -16,7 +16,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Dependencies
 
-- [x] **DEPS-01**: `stack.yaml` declares git extra-deps pinned by commit for `JMSBPP/mamertomics-etl` (private) and `d2p-finance/haskell-deepseek-plugin-sdk` (public); `stack.yaml.lock` committed
+- [x] **DEPS-01**: `stack.yaml` declares git extra-deps pinned by commit for the data resource (HTTP pointer, v2) (private) and `d2p-finance/haskell-deepseek-plugin-sdk` (public); `stack.yaml.lock` committed
 - [x] **DEPS-02**: `stack.yaml` declares `JMSBPP/kalecky-semantics` (now a plain Stack project) as a pinned git extra-dep, and `package.yaml` depends on `kalecky-semantics` so `Kalecky.Types.*` are importable — no local dimensional types are defined
 - [x] **DEPS-03**: Each extra-dep's role and the "bump deliberately, never track a branch" rule are documented in README (dependency table with owner, visibility, pinned commit, why)
 - [x] **DEPS-04**: A compile-time proof that all three deps resolve: a module importing at least one symbol from each (or, for stubs with no library, a documented note that the dep is executable-only until upstream exposes a library — the build must still succeed)
@@ -24,13 +24,13 @@ Requirements for initial release. Each maps to roadmap phases.
 ### CI
 
 - [ ] **CI-01**: GitHub Actions workflow on `push`/`pull_request` runs `stack build --test --no-run-tests` then `stack test` on ubuntu, with Stack + `~/.stack` caching keyed on `stack.yaml.lock`
-- [ ] **CI-02**: CI can fetch the private `JMSBPP/mamertomics-etl` extra-dep via a scoped token injected through `git config url.insteadOf` (token in repo secrets, never in files); public `d2p-finance` dep fetches without auth
+- [ ] **CI-02**: CI can fetch the private the data resource (HTTP pointer, v2) extra-dep via a scoped token injected through `git config url.insteadOf` (token in repo secrets, never in files); public `d2p-finance` dep fetches without auth
 - [ ] **CI-03**: CI fails loudly if `stack.yaml.lock` is out of date with `stack.yaml` (no silent re-resolution)
 - [ ] **CI-04**: A green CI run exists on `main` after the scaffold lands (observable in `gh run list`)
 
 ## v2 Requirements
 
-Deferred to future release. Tracked but not in current roadmap. All are gated on upstream repos exposing real APIs (`haskell-deepseek-plugin-sdk` library, `mamertomics-etl` read surface, `kalecky-semantics` KaleckianKernel).
+Deferred to future release. Tracked but not in current roadmap. All are gated on upstream repos exposing real APIs (`haskell-deepseek-plugin-sdk` library, the data resource read surface, `kalecky-semantics` KaleckianKernel).
 
 ### Protocol
 
@@ -48,7 +48,7 @@ Deferred to future release. Tracked but not in current roadmap. All are gated on
 
 ### Data grounding
 
-- **DATA-01**: Shock magnitudes read from `mamertomics-db` through `mamertomics-etl`'s read API (session-mode pooler, DSN via env) — blocked until that API exists
+- **DATA-01**: Shock magnitudes read from the macro data resource through the data resource's read API (session-mode pooler, DSN via env) — blocked until that API exists
 - **DATA-02**: Claim → data-query traceability recorded in the shock's provenance
 
 ### Formalization
@@ -64,7 +64,7 @@ Explicitly excluded. Documented to prevent scope creep.
 |---------|--------|
 | Implementing `KaleckianKernel` | Owned by `JMSBPP/kalecky-semantics`; this project only reads its API docs (user decision 2026-08-25) |
 | Solving the Kaleckian model | Monorepo GAMS bridge owns solving; plugin emits shocks only |
-| Ingesting / transforming source data | `mamertomics-etl` owns fetch/parse/load |
+| Ingesting / transforming source data | the data resource owns fetch/parse/load |
 | Writing the SDK's library API here | Evolves upstream at `d2p-finance`; we sync |
 | In-process Cordis/TypeScript plugin | Constraint: Haskell over JSON-RPC |
 | Any local dimensional/unit types | "No third dimensional system" — `kalecky` only |

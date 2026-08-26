@@ -10,13 +10,13 @@
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| GHC | 9.10.3 | Compiler | Pinned by the chosen snapshot (below); matches `mamertomics-etl`'s GHC exactly |
+| GHC | 9.10.3 | Compiler | Pinned by the chosen snapshot (below); matches the data resource's GHC exactly |
 | Stack | 3.11.1 | Build tool | User-specified constraint; confirmed current stable (released 2026-06-13). A `v4.1.0.1` release candidate exists but is pre-release — stay on 3.11.1 |
 | Stackage snapshot **lts-24.56** | 2026-08-24 | Dependency set | See "Single Snapshot Decision" below |
 | aeson | 2.2.5.0 | JSON encode/decode | De facto standard; in-snapshot, no extra-dep. Required transitively by every other layer (protocol, codecs, kalecky types) |
 | json-rpc | 1.1.3 | JSON-RPC 2.0 envelope (request/response/notification framing, ID correlation) | In-snapshot; last published 2026-08-18 (actively maintained). Transport-agnostic "supports any underlying transport" design is exactly what the harness's caller-owned-byte-stream framing needs — pair it with a ~20-line hand-written line transport (below), not a heavier Conduit-based package |
-| hasql | 1.9.3.1 | Postgres client (binary protocol, prepared statements) | In-snapshot (no extra-dep needed — this alone removes a historical pain point with hasql on Stackage). Matches `mamertomics-etl`'s chosen DB layer; sharing one client library across the two repos means the same encoder/decoder conventions for `kalecky`-derived Postgres types can eventually be shared instead of re-invented |
-| hasql-pool | 1.3.0.5 | Connection pooling | In-snapshot. Pool against Supabase's **session-mode Supavisor pooler (port 5432)** — matches `mamertomics-etl`'s decision; hasql relies on the Postgres **extended query protocol** (server-side prepared statements), which transaction-mode pooling (6543) does not reliably support even after Supavisor 1.0's partial prepared-statement work |
+| hasql | 1.9.3.1 | Postgres client (binary protocol, prepared statements) | In-snapshot (no extra-dep needed — this alone removes a historical pain point with hasql on Stackage). Matches the data resource's chosen DB layer; sharing one client library across the two repos means the same encoder/decoder conventions for `kalecky`-derived Postgres types can eventually be shared instead of re-invented |
+| hasql-pool | 1.3.0.5 | Connection pooling | In-snapshot. Pool against Supabase's **session-mode Supavisor pooler (port 5432)** — matches the data resource's decision; hasql relies on the Postgres **extended query protocol** (server-side prepared statements), which transaction-mode pooling (6543) does not reliably support even after Supavisor 1.0's partial prepared-statement work |
 | autodocodec | 0.5.0.0 | Self-documenting `Codec` deriving `FromJSON`/`ToJSON` + JSON Schema together | In-snapshot. This project's claim-input and shock-output formats are explicitly "to be specified" (PROJECT.md) — autodocodec gives you the schema *as a byproduct* of writing the codec once, instead of hand-writing `FromJSON`/`ToJSON` and a separate schema/validation layer that will drift |
 
 ### Supporting Libraries
@@ -67,15 +67,15 @@ dependencies:
   # once kalecky is extracted (blocking prerequisite, see Alternatives Considered):
   - kalecky
   # private git deps, see stack.yaml below:
-  - mamertomics-etl
+  - the data resource
   - haskell-deepseek-plugin-sdk
 ```
 
 ## Single Snapshot Decision
 
-**Recommendation: `lts-24.56`, the same snapshot already pinned by `mamertomics-etl`.**
+**Recommendation: `lts-24.56`, the same snapshot already pinned by the data resource.**
 
-- `mamertomics-etl/stack.yaml` is already pinned to `lts-24.56` (GHC 9.10.3) as of 2026-08-25 — verified by direct read of the file.
+- `the data resource/stack.yaml` is already pinned to `lts-24.56` (GHC 9.10.3) as of 2026-08-25 — verified by direct read of the file.
 - `haskell-deepseek-plugin-sdk/stack.yaml` is pinned to `lts-22.43` (GHC 9.6.x), but its entire codebase is a `stack new` scaffold — one file, `Main.hs`, `putStrLn "hello world"`, `build-depends: base`. There is **no real dependency surface to migrate**; bumping its snapshot is a one-line change with zero blast radius. Bumping the ETL side would instead mean re-resolving a real dependency tree (`hasql`, `hasql-pool`, `amazonka` git pin, `kalecky`, warp) downward to GHC 9.6, fighting version floors that assume 9.10.
 - Verified live: `lts-24.56` was Stackage's most recent LTS-24 point release as of 2026-08-24 (one day before this research), so it is not a stale pin — it is current.
 - Practical effect: `sarmiento-plugins/stack.yaml` sets `snapshot: lts-24.56`; the SDK repo needs its `stack.yaml` bumped to `lts-24.x` before `sarmiento-plugins` can add it as a extra-dep without a resolver mismatch (Stack extra-deps from a different-resolver git repo generally still work — Stack resolves the extra-dep's own dependencies against *your* project's snapshot, not the extra-dep's own `stack.yaml` — but a scaffold with zero real dependencies gives zero opportunity for that to matter here anyway).
@@ -101,7 +101,7 @@ Confirmed live from the `packages/sdk/protocol/README.md`:
 | `json-rpc` + hand-written line transport | `jsonrpc-conduit` | If you later need backpressure-aware streaming over a socket transport instead of stdio pipes; adds a `conduit` dependency that buys nothing for a 7-method, unbatched, line-framed stdio protocol |
 | `json-rpc` | Hand-roll the entire envelope with bare `aeson` | Only if `json-rpc`'s ID-correlation model turns out to fight the notification-heavy shape of this protocol during implementation — treat as a fallback, not a first choice, since re-deriving JSON-RPC 2.0 framing correctness (batch detection, error object shape, ID type polymorphism) is exactly the kind of thing a maintained library exists to get right once |
 | `autodocodec` | Bare `aeson` `FromJSON`/`ToJSON` instances, hand-maintained | If the claim/shock format ends up genuinely simple (few constructors, no evolving schema needs) and the schema-as-byproduct benefit isn't worth the extra dependency and the `Codec` combinator learning curve |
-| `hasql` + `hasql-pool` | `postgresql-simple` | If a future contributor is unfamiliar with `hasql`'s statement/session/pool separation and needs faster onboarding — but this forfeits sharing conventions with `mamertomics-etl`'s data layer, and reintroduces stringly-typed row decoding |
+| `hasql` + `hasql-pool` | `postgresql-simple` | If a future contributor is unfamiliar with `hasql`'s statement/session/pool separation and needs faster onboarding — but this forfeits sharing conventions with the data resource's data layer, and reintroduces stringly-typed row decoding |
 | `hasql-interpolate` | `hasql-th` | If you want SQL checked against a **live** Supabase connection at compile time, and are willing to make CI provision that connection for every build |
 | QuickCheck + tasty | Hedgehog + tasty-hedgehog | See dedicated section below |
 
@@ -109,9 +109,9 @@ Confirmed live from the `packages/sdk/protocol/README.md`:
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| `opaleye` | This is `mamertomics-monorepo`'s **predecessor** storage layer for `mamertomics-db` (per both PROJECT.md files) — it's being actively superseded, not the live schema's access pattern. Depending on it here would create a second, divergent Postgres access convention alongside the ETL's `hasql` choice | `hasql` + `hasql-pool`, matching `mamertomics-etl` |
+| `opaleye` | This is `mamertomics-monorepo`'s **predecessor** storage layer for the macro data resource (per both PROJECT.md files) — it's being actively superseded, not the live schema's access pattern. Depending on it here would create a second, divergent Postgres access convention alongside the ETL's `hasql` choice | `hasql` + `hasql-pool`, matching the data resource |
 | A second, independently-defined dimensional/units type (`Price`, `Wage`, `Currency`, etc.) | The ETL's PROJECT.md is explicit: "Do not fork a third dimensional system." `kalecky` is the single source of truth once extracted | `kalecky` (`JMSBPP/kalecky-semantics`), reused as a shared dependency |
-| Depending directly on `kalecky-spec`'s cabal **sublibrary** as it exists today (`kalecky-spec/src/Kalecky/*` inside the hevm fork) | Stack cannot depend on cabal internal sublibraries at all — this is a confirmed upstream Stack limitation (commercialhaskell/stack issues #5318 and #5256), not a version-pinning problem you can work around with `extra-deps`. `mamertomics-etl`'s own PROJECT.md names this as a **hard Phase-0 gate**: extraction into a standalone base-only package is a prerequisite, not optional | Wait on (or contribute to) the `kalecky` extraction that `mamertomics-etl` already scoped as a blocking prerequisite; once it lands as its own git repo/subdir, add it as a normal Stack `git` extra-dep. `sarmiento-plugins` inherits this exact blocker transitively — it cannot get typed dimensional units before `mamertomics-etl` (or a shared extraction effort) finishes Phase 0 |
+| Depending directly on `kalecky-spec`'s cabal **sublibrary** as it exists today (`kalecky-spec/src/Kalecky/*` inside the hevm fork) | Stack cannot depend on cabal internal sublibraries at all — this is a confirmed upstream Stack limitation (commercialhaskell/stack issues #5318 and #5256), not a version-pinning problem you can work around with `extra-deps`. the data resource's own PROJECT.md names this as a **hard Phase-0 gate**: extraction into a standalone base-only package is a prerequisite, not optional | Wait on (or contribute to) the `kalecky` extraction that the data resource already scoped as a blocking prerequisite; once it lands as its own git repo/subdir, add it as a normal Stack `git` extra-dep. `sarmiento-plugins` inherits this exact blocker transitively — it cannot get typed dimensional units before the data resource (or a shared extraction effort) finishes Phase 0 |
 | Content-Length/LSP-style framing assumptions, or a general streaming/Conduit-based transport for stdio | The harness protocol is confirmed newline-delimited with no documented batching — a heavier framing library solves a problem this protocol doesn't have | The hand-written `\n`-line transport described above |
 | Designing around a `session/cancel` or similar RPC | Confirmed not to exist in the protocol as of 2026-08-25 ("deferred work"); the harness's only abort path is closing the child process | Handle `SIGPIPE`/EOF-on-stdin as the harness's actual cancel signal; document this as a real protocol limitation, not an oversight in this project's design |
 
@@ -148,7 +148,7 @@ packages:
   - .
 
 extra-deps:
-  - git: https://github.com/JMSBPP/mamertomics-etl.git
+  - git: <data-resource-url>
     commit: <pin to a specific commit SHA — moving target, bump deliberately>
   - git: https://github.com/d2p-finance/haskell-deepseek-plugin-sdk.git
     commit: <pin to a specific commit SHA>
@@ -173,8 +173,8 @@ Stack has no auth mechanism of its own for git extra-deps — it shells out to t
   run: stack build
 ```
 
-- `PRIVATE_DEPS_TOKEN` should be a **fine-grained GitHub Personal Access Token**, scoped only to the specific private repos this project depends on (`JMSBPP/mamertomics-etl`, and `d2p-finance/haskell-deepseek-plugin-sdk` if/when it goes private) — not a classic PAT with broad `repo` scope.
-- The default `GITHUB_TOKEN` that Actions injects automatically works **only** for repos within the same GitHub org/owner as the workflow; since `mamertomics-etl` is under the same `JMSBPP` account as `sarmiento-plugins`, `GITHUB_TOKEN` (with `contents: read` permission and, if needed, cross-repo access via an org setting) may suffice for that dependency without a separate PAT — but the SDK repo (`d2p-finance` org) will always need an explicit PAT or GitHub App installation token, since it's a different owner.
+- `PRIVATE_DEPS_TOKEN` should be a **fine-grained GitHub Personal Access Token**, scoped only to the specific private repos this project depends on (the data resource (HTTP pointer, v2), and `d2p-finance/haskell-deepseek-plugin-sdk` if/when it goes private) — not a classic PAT with broad `repo` scope.
+- The default `GITHUB_TOKEN` that Actions injects automatically works **only** for repos within the same GitHub org/owner as the workflow; since the data resource is under the same `JMSBPP` account as `sarmiento-plugins`, `GITHUB_TOKEN` (with `contents: read` permission and, if needed, cross-repo access via an org setting) may suffice for that dependency without a separate PAT — but the SDK repo (`d2p-finance` org) will always need an explicit PAT or GitHub App installation token, since it's a different owner.
 - Because `insteadOf` rewrites at the git-config level, it applies uniformly to every `https://github.com/...` URL Stack tries to clone — including any future private extra-dep — without touching `stack.yaml`.
 
 **Confidence: HIGH** for the mechanism (this is standard, widely-used git config, not Stack-specific magic, and matches multiple independently-verified current sources) — **MEDIUM** for the exact token-scoping recommendation across the two owners (`JMSBPP` vs `d2p-finance`), since it depends on org-level cross-repo `GITHUB_TOKEN` settings this research didn't (and can't, without repo admin access) directly verify.
@@ -183,7 +183,7 @@ Stack has no auth mechanism of its own for git extra-deps — it shells out to t
 
 | Package A | Compatible With | Notes |
 |-----------|-----------------|-------|
-| GHC 9.10.3 (lts-24.56) | `mamertomics-etl`'s pinned GHC | Identical — verified by reading both `stack.yaml` files; zero cross-compiler friction on that side |
+| GHC 9.10.3 (lts-24.56) | the data resource's pinned GHC | Identical — verified by reading both `stack.yaml` files; zero cross-compiler friction on that side |
 | GHC 9.10.3 (lts-24.56) | `haskell-deepseek-plugin-sdk`'s current pin (GHC 9.6.6 / lts-22.43) | **Mismatched today.** The SDK repo needs its snapshot bumped before/while adding it as an extra-dep here; low risk given it's a one-file scaffold with only a `base` dependency |
 | `hasql` 1.9.3.1 / `hasql-pool` 1.3.0.5 | Supabase Supavisor **session-mode pooler**, port 5432 | Required — `hasql` uses the Postgres extended query protocol (server-side prepared statements); Supavisor's transaction-mode pooler (6543) does not reliably support this even post-1.0, per Supabase's own troubleshooting docs |
 | `kalecky` (once extracted) | Stack (any recent version) | Only resolvable once extraction out of the `kalecky-spec` cabal **sublibrary** happens — this is a hard blocker independent of snapshot choice, per Stack issues #5318/#5256 |
@@ -191,8 +191,8 @@ Stack has no auth mechanism of its own for git extra-deps — it shells out to t
 
 ## Sources
 
-- `mamertomics-etl/stack.yaml` (read directly) — confirms `lts-24.56` pin, GHC 9.10.3
-- `mamertomics-etl/.planning/PROJECT.md` (read directly) — confirms hasql-pool + Supavisor session-mode decision, `kalecky` extraction as Phase-0 gate, Stack sublibrary limitation (#5318/#5256)
+- `the data resource/stack.yaml` (read directly) — confirms `lts-24.56` pin, GHC 9.10.3
+- `the data resource/.planning/PROJECT.md` (read directly) — confirms hasql-pool + Supavisor session-mode decision, `kalecky` extraction as Phase-0 gate, Stack sublibrary limitation (#5318/#5256)
 - `haskell-deepseek-plugin-sdk/stack.yaml`, `.cabal`, `src/Main.hs` (read directly) — confirms scaffold-only state, `lts-22.43` pin, zero real dependencies
 - `kalecky-semantics/.planning/PROJECT.md`, `kalecky-spec/kalecky-spec.cabal` (read directly) — confirms QuickCheck + Tasty precedent, `aeson`/`optics-core` conventions already in use for `kalecky` types
 - https://www.stackage.org/lts-24.56 and per-package pages (`aeson`, `hasql`, `hasql-pool`, `hasql-interpolate`, `hasql-th`, `autodocodec`, `hedgehog`, `tasty`, `QuickCheck`, `process`, `bytestring`, `containers`, `json-rpc`) — HIGH confidence, versions fetched live 2026-08-25

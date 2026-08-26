@@ -1,5 +1,4 @@
-# Snapshot pinned to Stackage lts-24.56 (GHC 9.10.3) — the same snapshot as
-# JMSBPP/mamertomics-etl, so the two projects share one compiler and one dependency set.
+# Snapshot pinned to Stackage lts-24.56 (GHC 9.10.3).
 #
 # The immutable URL form is used deliberately instead of the bare name `lts-24.56`:
 # Stack treats a URL-provided snapshot as fixed and will not re-resolve it.
@@ -18,20 +17,13 @@ packages:
 # edit here plus a `stack build` that rewrites the lock, committed together. The bump
 # procedure is written down in README.md.
 #
-# HTTPS URLs (not git@github.com:...) are used on purpose: this is the form Phase 3's CI
-# rewrites with `git config url."https://x-access-token:${TOKEN}@github.com/".insteadOf`
-# to fetch the one private repo. An SSH form would need a second, CI-incompatible pin.
+# HTTPS URLs (not git@github.com:...) are used on purpose: every upstream is public, so
+# CI can fetch them without any credential.
 extra-deps:
 # Sole source of dimensional, unit, currency and price types. Public repo, zero non-base
 # dependencies, so depending on it pulls nothing else into the build plan.
 - git: https://github.com/JMSBPP/kalecky-semantics.git
   commit: cd6778e2d39c5eb30549d8ff87459b5644cc18fc
-
-# Owns mamertomics-db, the Supabase staging schema this plugin will read. Private repo:
-# fetched locally through the existing `gh auth git-credential` helper, and in CI through
-# a scoped token (Phase 3, CI-02).
-- git: https://github.com/JMSBPP/mamertomics-etl.git
-  commit: c8b45ac159553017df82c4258af3d2bf68b5f62e
 
 # DeepSeek Harness (Cordis) plugin SDK. Declared here and NOWHERE in package.yaml: at this
 # commit the package's `library` stanza exists but every exposed module has an empty export

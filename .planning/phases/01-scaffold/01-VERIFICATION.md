@@ -25,7 +25,7 @@ score: 4/4 must-haves verified
 
 **Score:** 4/4 truths verified
 
-Additional README/CHANGELOG/.gitignore truths (SCAF-03, plan 01-01) also verified: README.md (91 lines) names all three upstreams (`mamertomics-etl`, `haskell-deepseek-plugin-sdk`, `kalecky-semantics` — grep count 8), contains `stack build`, `stack test`, `lts-24.56`, and the case-insensitive string "scaffold only". CHANGELOG.md contains `## Unreleased`. No political framing found in either file (`gobierno|government|president|partido|...` grep returned nothing). `.gitignore` is git-enforced: `.stack-work/foo`, `.env`, `server.pem`, `credentials` all report ignored via `git check-ignore -q`; `stack.yaml.lock` and `sarmiento-plugins.cabal` correctly report **not** ignored (still trackable), and both are in fact tracked (`git ls-files`).
+Additional README/CHANGELOG/.gitignore truths (SCAF-03, plan 01-01) also verified: README.md (91 lines) names all three upstreams (the data resource, `haskell-deepseek-plugin-sdk`, `kalecky-semantics` — grep count 8), contains `stack build`, `stack test`, `lts-24.56`, and the case-insensitive string "scaffold only". CHANGELOG.md contains `## Unreleased`. No political framing found in either file (`gobierno|government|president|partido|...` grep returned nothing). `.gitignore` is git-enforced: `.stack-work/foo`, `.env`, `server.pem`, `credentials` all report ignored via `git check-ignore -q`; `stack.yaml.lock` and `sarmiento-plugins.cabal` correctly report **not** ignored (still trackable), and both are in fact tracked (`git ls-files`).
 
 ### Required Artifacts
 
@@ -35,7 +35,7 @@ Additional README/CHANGELOG/.gitignore truths (SCAF-03, plan 01-01) also verifie
 | `CHANGELOG.md` | Keep-a-Changelog Unreleased section, ≥8 lines, contains `Unreleased` | VERIFIED | 19 lines; `## Unreleased` present; tracked (commit `5175757`) |
 | `.gitignore` | Build-artefact/secret exclusion rules, ≥15 lines, contains `.stack-work/` | VERIFIED | 38 lines; git-enforced (see above); tracked (commit `652b0f7`) |
 | `stack.yaml` | Immutable snapshot pin `lts/24/56.yaml` | VERIFIED | Snapshot URL present; `extra-deps: []`; tracked (commit `6dc3107`) |
-| `package.yaml` | hpack: library in src/, test-suite in test/, -Wall-plus set, no executable | VERIFIED | `library:` and `sarmiento-plugins-test:` present, no `executables:` stanza, no `Werror`; `ghc-options` block byte-identical to `/home/jmsbpp/mamertomics-etl/package.yaml`'s (diff empty) |
+| `package.yaml` | hpack: library in src/, test-suite in test/, -Wall-plus set, no executable | VERIFIED | `library:` and `sarmiento-plugins-test:` present, no `executables:` stanza, no `Werror`; `ghc-options` block byte-identical to `/home/jmsbpp/the data resource/package.yaml`'s (diff empty) |
 | `src/Sarmiento/Plugin.hs` | Library's only module; exports `pluginName`, `pluginVersion` | VERIFIED | Both exported with type signatures; only module in `src/Sarmiento/`; imported and used by `test/Spec.hs` |
 | `src/Education/README.md` | One-line placeholder proving non-.hs file under source-dirs is harmless | VERIFIED | 1 line; `stack build` succeeds with it present, contributes no module |
 | `test/Spec.hs` | tasty defaultMain with one QuickCheck property, contains `testProperty` | VERIFIED | Imports `Sarmiento.Plugin`, one `testProperty`, `stack test` reports it passing |
@@ -49,9 +49,9 @@ Additional README/CHANGELOG/.gitignore truths (SCAF-03, plan 01-01) also verifie
 | `stack.yaml` | Stackage lts-24.56 | immutable snapshot URL | WIRED | `snapshot: url: .../lts/24/56.yaml` present; `stack exec -- ghc --version` confirms GHC 9.10.3 actually resolved from it |
 | `test/Spec.hs` | `src/Sarmiento/Plugin.hs` | import of library symbol used inside the property | WIRED | `import Sarmiento.Plugin (pluginName)`; `pluginName` used to build the property subject; compiles and links successfully |
 | `package.yaml` tests stanza | `sarmiento-plugins` library component | dependencies entry | WIRED | `dependencies:` under `sarmiento-plugins-test:` lists `sarmiento-plugins`; confirmed functional by successful `stack test` link |
-| `package.yaml` ghc-options | `mamertomics-etl`'s warning set | identical -W flag list | WIRED | `diff` between the two `ghc-options:` blocks produces no output — byte-identical |
+| `package.yaml` ghc-options | the data resource's warning set | identical -W flag list | WIRED | `diff` between the two `ghc-options:` blocks produces no output — byte-identical |
 | `.gitignore` | git index | exclusion rules | WIRED | `git check-ignore -q` confirmed for `.stack-work/foo`, `.env`, `server.pem`, `credentials`; confirmed non-ignored for `stack.yaml.lock`, `sarmiento-plugins.cabal` |
-| `README.md` | the three upstream repositories | dependency table naming each repo | WIRED | grep count of `mamertomics-etl\|haskell-deepseek-plugin-sdk\|kalecky-semantics` = 8 occurrences across the table and dependencies section |
+| `README.md` | the three upstream repositories | dependency table naming each repo | WIRED | grep count of `the data resource\|haskell-deepseek-plugin-sdk\|kalecky-semantics` = 8 occurrences across the table and dependencies section |
 
 ### Requirements Coverage
 

@@ -35,4 +35,4 @@ secrets.yml
 
 # --- Deliberately NOT ignored ------------------------------------------------
 # stack.yaml.lock      : pins the resolved snapshot; Phase 3 CI keys its cache on it
-# sarmiento-plugins.cabal : hpack output, committed to match JMSBPP/mamertomics-etl
+# sarmiento-plugins.cabal : hpack output, committed so the build works without hpack
