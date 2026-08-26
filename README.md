@@ -1,8 +1,8 @@
+# sarmiento-plugins
+
 <p align="center">
   <img src="docs/assets/hero.png" alt="Eduardo Sarmiento over a natural-transformation diagram" width="320">
 </p>
-
-# sarmiento-plugins
 
 > **Mission.** Formalise Eduardo Sarmiento mathematically. This repository turns the Colombian
 > economist's structuralist claims — demand regime, markup and income distribution, the external
