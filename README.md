@@ -1,6 +1,17 @@
+<p align="center">
+  <img src="docs/assets/hero.png" alt="Eduardo Sarmiento over a natural-transformation diagram" width="320">
+</p>
+
 # sarmiento-plugins
 
-A private Haskell project that will ship a **DeepSeek Harness (Cordis) plugin acting as a
+> **Mission.** Formalise Eduardo Sarmiento mathematically. This repository turns the Colombian
+> economist's structuralist claims — demand regime, markup and income distribution, the external
+> constraint, productive structure — into typed, dimensionally-checked objects, and ships them as a
+> **Colombian plugin to a neo-Kaleckian model**: a concrete instance of the generic `KaleckianKernel`
+> owned by [`kalecky-semantics`](https://github.com/JMSBPP/kalecky-semantics). Sarmiento stops being
+> prose and becomes a plugin over a reusable kernel.
+
+A Haskell project that will ship a **DeepSeek Harness (Cordis) plugin acting as a
 contained agent**. Given structured claims by the Colombian economist Eduardo Sarmiento —
 statements about demand regime, markup and income distribution, the external constraint, and
 productive structure — the plugin will read Colombian macroeconomic series from
