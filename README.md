@@ -1,7 +1,10 @@
 # sarmiento-plugins
 
 <p align="center">
-  <img src="docs/assets/hero.png" alt="Eduardo Sarmiento over a natural-transformation diagram" width="320">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/hero-dark.png">
+    <img src="docs/assets/hero-light.png" alt="Eduardo Sarmiento over a natural-transformation diagram" width="320">
+  </picture>
 </p>
 
 > **Mission.** Formalise Eduardo Sarmiento mathematically. This repository turns the Colombian
