@@ -4,7 +4,8 @@
 \[
 	\begin{aligned}
 		\texttt{IncomeDist} \\
-		\texttt{Development}
+		\texttt{EconDevelopment} \\
+		\texttt{EconGrowth}
 	\end{aligned}
 \]
 
@@ -44,4 +45,43 @@ For capitalization we have:
 
 
 \(\texttt{Horizon}: \texttt{LongRun} \mid \texttt{ShortRun}\)
+
+
+
+- \(\texttt{EconGrowth}\) via \(\texttt{GrowthEffectOfDist}(\texttt{Horizon}, \texttt{IncomeDist})\) with comparative-statics sign \(\texttt{DistGrowthSign}\) is a **proof/theorem** type over the types above: \(\texttt{SarmientoGrowthDeterminationLaw}\). Note that we can define:
+
+\[
+	\begin{aligned}
+		\texttt{GrowthEffectOfDist} :: \texttt{Horizon} \times \texttt{IncomeDist} \mapsto \texttt{EconGrowth} \\
+		\texttt{Sign}: \texttt{Positive} \mid \texttt{Negative} \mid \texttt{Zero} \\
+		\texttt{DistGrowthSign} :: \texttt{Horizon} \mapsto \texttt{Sign} \\
+		\texttt{SarmientoGrowthDeterminationLaw}:\
+			\texttt{DistGrowthSign}(\texttt{LongRun}) = \texttt{Positive},\ 
+			\texttt{DistGrowthSign}(\texttt{ShortRun}) = \texttt{Negative}
+	\end{aligned}
+\]
+
+- \(\texttt{Transmission}(\texttt{MeanIncome}, \texttt{IncomeDist})\) with channel status \(\texttt{Absent}\) is a **proof/theorem** type over the types above: \(\texttt{SarmientoMeanIncomeNonTransmissionLaw}\). Mean income = average per-capita income level; raising it is not an automatic transmission channel into distribution under Sarmiento (rival monometric regression deferred). Note that we can define:
+
+\[
+	\begin{aligned}
+		\texttt{ChannelStatus}: \texttt{Present} \mid \texttt{Absent} \\
+		\texttt{Transmission} :: \texttt{Source} \times \texttt{Target} \mapsto \texttt{ChannelStatus} \\
+		\texttt{SarmientoMeanIncomeNonTransmissionLaw}:\
+			\texttt{Transmission}(\texttt{MeanIncome}, \texttt{IncomeDist}) = \texttt{Absent}
+	\end{aligned}
+\]
+
+- \(\texttt{TrendCoMoveSign}(\texttt{Trend}(\texttt{BottomIncome}), \texttt{Trend}(\texttt{MeanIncome})) = \texttt{Positive}\) is a **proof/theorem** type over the types above: \(\texttt{SarmientoTrendCoMoveLaw}\). Complements non-transmission of mean **levels** into \(\texttt{IncomeDist}\): bottom and mean **trends** co-move. Note that we can define:
+
+\[
+	\begin{aligned}
+		\texttt{Trend} : a \mapsto \texttt{Trend}(a) \\
+		\texttt{BottomIncome}\ \text{(poorest incomes)} \\
+		\texttt{TrendCoMoveSign} :: \texttt{Trend}(\texttt{BottomIncome}) \times \texttt{Trend}(\texttt{MeanIncome}) \mapsto \texttt{Sign} \\
+		\texttt{SarmientoTrendCoMoveLaw}:\
+			\texttt{TrendCoMoveSign}(\texttt{Trend}(\texttt{BottomIncome}), \texttt{Trend}(\texttt{MeanIncome})) = \texttt{Positive}
+	\end{aligned}
+\]
+
 
