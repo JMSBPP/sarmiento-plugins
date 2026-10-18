@@ -1,0 +1,48 @@
+package sarmiento-plugins
+version = 0.1.0
+authors = "JMSBPP"
+-- maintainers =
+license = "BSD-3-Clause"
+brief = "DeepSeek Harness plugin translating Sarmiento claims into typed Kaleckian shocks"
+readme = "README.md"
+homepage = "https://github.com/JMSBPP/sarmiento-plugins#readme"
+sourceloc = "https://github.com/JMSBPP/sarmiento-plugins"
+bugtracker = "https://github.com/JMSBPP/sarmiento-plugins/issues"
+
+-- the Idris2 version required (e.g. langversion >= 0.5.1)
+-- langversion
+
+-- packages to add to search path
+-- depends =
+
+-- modules to install
+modules = Sarmiento_plugins
+
+-- main file (i.e. file to load at REPL)
+-- main =
+
+-- name of executable
+-- executable =
+-- opts =
+sourcedir = "src"
+-- datadir =
+-- builddir =
+-- outputdir =
+
+-- script to run before building
+-- prebuild =
+
+-- script to run after building
+-- postbuild =
+
+-- script to run after building, before installing
+-- preinstall =
+
+-- script to run after installing
+-- postinstall =
+
+-- script to run before cleaning
+-- preclean =
+
+-- script to run after cleaning
+-- postclean =

@@ -1,0 +1,10 @@
+[custom.all.sarmiento-plugins]
+type = "local"
+path = "."
+ipkg = "sarmiento-plugins.ipkg"
+test = "test/test.ipkg"
+
+[custom.all.sarmiento-plugins-test]
+type = "local"
+path = "test"
+ipkg = "test.ipkg"
