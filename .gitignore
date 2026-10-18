@@ -1,15 +1,9 @@
-# --- Haskell build artefacts -------------------------------------------------
-.stack-work/
-dist-newstyle/
-dist/
-*.hi
-*.o
-*.dyn_hi
-*.dyn_o
-*.prof
-*.tix
-.hpc/
-.hie/
+# --- Worktrees ---------------------------------------------------------------
+.worktrees/
+
+# --- Idris2 / pack -----------------------------------------------------------
+build/
+*.*~
 
 # --- Editor and OS noise -----------------------------------------------------
 *~
@@ -32,7 +26,3 @@ credentials
 credentials.json
 secrets.yaml
 secrets.yml
-
-# --- Deliberately NOT ignored ------------------------------------------------
-# stack.yaml.lock      : pins the resolved snapshot; Phase 3 CI keys its cache on it
-# sarmiento-plugins.cabal : hpack output, committed so the build works without hpack
