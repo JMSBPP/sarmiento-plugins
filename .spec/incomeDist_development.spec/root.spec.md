@@ -44,6 +44,23 @@ For capitalization we have:
 \]
 
 
+
+For capital accumulation we have:
+
+\[
+	\begin{aligned}
+		\texttt{CapitalAccumulation} :: \texttt{Path}(\texttt{CapitalSaving}) \mapsto \texttt{InvestmentDemand} \\
+		\quad\text{i.e.}\quad
+		\texttt{InvestmentDemand} = \int \texttt{CapitalSaving}\,dt
+	\end{aligned}
+\]
+
+Distinct from \(\texttt{Capitalization}\) (income \(\mapsto\) present value via a rate): accumulation integrates capital-saving along a path into investment demand.
+
+
+
+
+
 \(\texttt{Horizon}: \texttt{LongRun} \mid \texttt{ShortRun}\)
 
 
@@ -58,6 +75,61 @@ For capitalization we have:
 		\texttt{SarmientoGrowthDeterminationLaw}:\
 			\texttt{DistGrowthSign}(\texttt{LongRun}) = \texttt{Positive},\ 
 			\texttt{DistGrowthSign}(\texttt{ShortRun}) = \texttt{Negative}
+	\end{aligned}
+\]
+
+
+Inhabitant of \(\texttt{SarmientoGrowthDeterminationLaw}\): \(\texttt{SurplusAbsorption}\).
+
+- \(\texttt{SurplusAbsorption}\): mechanism that shifts surplus from \(\texttt{CapitalSaving}\) into consumption. Example mechanisms: savings\(\to\)consumption transfers, price controls, fiscal deficits.
+- Judgment: \(\texttt{SurplusAbsorption} : \texttt{SarmientoGrowthDeterminationLaw}\) (conjunction \(\texttt{ShortRun} \land \texttt{LongRun}\)).
+
+\[
+	\begin{aligned}
+		\texttt{SurplusAbsorption} : \texttt{SarmientoGrowthDeterminationLaw} \\
+		\texttt{SarmientoGrowthDeterminationLaw} \mapsto
+			(\texttt{DistGrowthSign}(\texttt{ShortRun}) = \texttt{Negative})
+			\land
+			(\texttt{DistGrowthSign}(\texttt{LongRun}) = \texttt{Positive})
+	\end{aligned}
+\]
+
+**ShortRun** (contrapositive). Goal: \(\texttt{DistGrowthSign}(\texttt{ShortRun}) = \texttt{Negative}\). Prove contrapositive \(\downarrow\texttt{IncomeDist} \Rightarrow \uparrow\texttt{EconGrowth}\):
+
+\[
+	\begin{aligned}
+		\downarrow\texttt{IncomeDist} &\Rightarrow \uparrow\texttt{CapitalSaving} \\
+		\uparrow\texttt{CapitalSaving} &\Rightarrow \uparrow\texttt{InvestmentDemand}
+			\quad\text{via}\quad \texttt{CapitalAccumulation} \\
+		&\Rightarrow \uparrow\texttt{ProfitShare} \\
+		\uparrow\texttt{ProfitShare} &\Rightarrow \uparrow\texttt{CapitalSaving} / \uparrow\texttt{InvestmentDemand} \\
+		\uparrow\texttt{InvestmentDemand} &\Rightarrow \uparrow\texttt{EconGrowth}
+	\end{aligned}
+\]
+
+**LongRun.** Premises: \(\texttt{IncomeDist}\) is path-dependent / accumulated; \(\texttt{InclusivePoliticalInstitutions}\) (named premise only). Past ShortRun may lower \(\texttt{IncomeDist}\) (growth via the contrapositive chain). Thin axiom:
+
+\[
+	\begin{aligned}
+		\texttt{InclusivePoliticalInstitutions}\ \text{(premise)} \\
+		\texttt{IncomeDistMeanReversion}:\
+			\texttt{Assuming}\ \texttt{InclusivePoliticalInstitutions},\ \text{then}\ 
+			\downarrow\texttt{IncomeDist}_{t}
+			\Rightarrow
+			\uparrow\texttt{IncomeDist}_{t+T}
+			\quad (T > 0)
+	\end{aligned}
+\]
+
+Hole \(\texttt{?longRunPositive}\): derivation from \(\texttt{IncomeDistMeanReversion}\) \(\land\) ShortRun path algebra to \(\texttt{DistGrowthSign}(\texttt{LongRun}) = \texttt{Positive}\) (vs merely re-entering the ShortRun Negative machine). Conjunction closes when this hole is filled.
+
+- \(\texttt{Transmission}(\texttt{IncomeDist}, \texttt{CapitalSaving}) = \texttt{Absent}\) is a **proof/theorem** type **derived from** \(\texttt{SurplusAbsorption} : \texttt{SarmientoGrowthDeterminationLaw}\): \(\texttt{SarmientoCapitalSavingNonTransmissionLaw}\). Sibling of \(\texttt{SarmientoMeanIncomeNonTransmissionLaw}\): long-run **net** independence (ShortRun path may still move \(\texttt{CapitalSaving}\)). Conditional on closing \(\texttt{?longRunPositive}\). Note that we can define:
+
+\[
+	\begin{aligned}
+		\texttt{SarmientoCapitalSavingNonTransmissionLaw}:\
+			\texttt{Transmission}(\texttt{IncomeDist}, \texttt{CapitalSaving}) = \texttt{Absent} \\
+		\quad\text{derives from}\ \texttt{SurplusAbsorption} : \texttt{SarmientoGrowthDeterminationLaw}
 	\end{aligned}
 \]
 
@@ -77,10 +149,21 @@ For capitalization we have:
 \[
 	\begin{aligned}
 		\texttt{Trend} : a \mapsto \texttt{Trend}(a) \\
-		\texttt{BottomIncome}\ \text{(poorest incomes)} \\
+		\texttt{BottomIncome}  \\
 		\texttt{TrendCoMoveSign} :: \texttt{Trend}(\texttt{BottomIncome}) \times \texttt{Trend}(\texttt{MeanIncome}) \mapsto \texttt{Sign} \\
 		\texttt{SarmientoTrendCoMoveLaw}:\
 			\texttt{TrendCoMoveSign}(\texttt{Trend}(\texttt{BottomIncome}), \texttt{Trend}(\texttt{MeanIncome})) = \texttt{Positive}
+	\end{aligned}
+\]
+
+- \(\texttt{CapitalPtySubsidyDistEffect}(\texttt{CapitalPty}, \texttt{CapitalSubsidy}) = \texttt{Negative}\) as \(\texttt{Effect}(\texttt{IncomeDist})\) is a **proof/theorem** type over the types above: \(\texttt{SarmientoCapitalDistDeterminationLaw}\). \(K/Y\) may proxy \(\texttt{CapitalPty}\) in measurement; it is not the law’s carrier. Note that we can define:
+
+\[
+	\begin{aligned}
+		\texttt{Effect} : a \mapsto \texttt{Sign} \\
+		\texttt{CapitalPtySubsidyDistEffect} :: \texttt{CapitalPty} \times \texttt{CapitalSubsidy} \mapsto \texttt{Effect}(\texttt{IncomeDist}) \\
+		\texttt{SarmientoCapitalDistDeterminationLaw}:\
+			\texttt{CapitalPtySubsidyDistEffect}(\texttt{CapitalPty}, \texttt{CapitalSubsidy}) = \texttt{Negative}
 	\end{aligned}
 \]
 
