@@ -1,8 +1,8 @@
-# Typecheck a single Idris2 source file (path relative to repo root, e.g. src/Foo.idr)
+# Typecheck a package name or .ipkg file
 typecheck file:
-    idris2 --find-ipkg --check {{file}}
+    pack typecheck {{file}}
 
-# Typecheck every .idr file under src/
+# Typecheck every module under src/ via the local package
 typecheck-src:
     #!/usr/bin/env bash
     set -euo pipefail
@@ -17,5 +17,5 @@ typecheck-src:
       [[ -n ${seen[$f]+x} ]] && continue
       seen[$f]=1
       echo "typechecking $f"
-      idris2 --find-ipkg --check "$f"
     done
+    pack typecheck sarmiento-plugins
