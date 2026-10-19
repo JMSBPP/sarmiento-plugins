@@ -1,8 +1,8 @@
 $onText
 ================================================
-	-------> TechDiffusion <-----------------
-		 Parameter TechDiffusion(Labor, Technology)
-================================================
+	-------> INPUT <-----------------
+		 TODO: Lock notation
+===============================================
 $offText
 
 $include "build/deps.inc"
