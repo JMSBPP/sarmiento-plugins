@@ -8,6 +8,9 @@ build/
 # --- GAMS generated includes / listings --------------------------------------
 src/build/
 
+# --- Git-pinned GAMS dep checkouts -------------------------------------------
+.cache/
+
 # --- Editor and OS noise -----------------------------------------------------
 *~
 *.swp

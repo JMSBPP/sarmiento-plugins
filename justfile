@@ -6,10 +6,7 @@ typecheck file:
 typecheck-src:
     pack typecheck sarmiento-plugins
 
-# Emit deps.inc then compile a GAMS module under src/.
-# Requires KALECKY_CHECKOUT=/path/to/kalecky/repo (GAMS src = $KALECKY_CHECKOUT/src).
-# Usage:  just gams parameters/TechDiffusion.gms
-# Listing: src/build/<slashes_to_underscores>.lst
+# Emit deps.inc (git pin → .cache/ if needed) then gams action=ce under src/
 gams file:
     #!/usr/bin/env bash
     set -euo pipefail

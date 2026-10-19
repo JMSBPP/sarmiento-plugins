@@ -1,5 +1,6 @@
 # Git-pinned GAMS sources. Idris (gams-deps-emit) writes src/build/deps.inc.
-# v1: local checkout must match; no clone/fetch automation.
+# Emitter clones/checks out each pin into .cache/gams-deps/ when KALECKY_CHECKOUT
+# (and CLI path) are unset.
 
 [[pin]]
 url = "https://github.com/JMSBPP/kalecky-semantics.git"
