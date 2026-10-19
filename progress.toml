@@ -1,0 +1,5 @@
+[plugins.incomeDist_development]
+from = "IncomeDistribution"
+to = "Development"
+worktree = ".worktrees/plugin/incomeDist_development"
+branch = "plugin/incomeDist_development"
