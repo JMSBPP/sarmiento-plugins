@@ -1,0 +1,7 @@
+# Git-pinned GAMS sources. Idris (gams-deps-emit) writes src/build/deps.inc.
+# v1: local checkout must match; no clone/fetch automation.
+
+[[pin]]
+url = "https://github.com/JMSBPP/kalecky-semantics.git"
+commit = "d724d67bd7fa18da559d6902bb3882159a901ac8"
+subdir = "src"

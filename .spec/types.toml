@@ -1,0 +1,44 @@
+# Algebra metadata for Idris types (idris-tdd)
+
+[gamsDeps.AbsPath]
+module = "GamsDeps.AbsPath"
+kind = "plain"
+file = "src/GamsDeps/AbsPath.idr"
+carriers = ["AbsPath"]
+operations = ["absPathString", "mkAbsPath"]
+laws = ["AbsPath carries a non-relative filesystem path string"]
+refined = false
+notes = "Candidate checkout / GAMS src directory as absolute path"
+
+[gamsDeps.GitPin]
+module = "GamsDeps.GitPin"
+kind = "plain"
+file = "src/GamsDeps/GitPin.idr"
+carriers = ["GitPin"]
+operations = []
+laws = ["Pin records url, commit SHA, and GAMS src subdir"]
+refined = false
+notes = "Git pin from gams-deps.toml; no clone/fetch in v1"
+
+[gamsDeps.DepsInc]
+module = "GamsDeps.DepsInc"
+kind = "plain"
+file = "src/GamsDeps/DepsInc.idr"
+carriers = ["DepsInc"]
+operations = ["depsIncString"]
+laws = ["DepsInc is the exact text of deps.inc ($setGlobal lines)"]
+refined = false
+notes = "Generated GAMS include content"
+
+[gamsDeps.Ops]
+module = "GamsDeps.Ops"
+kind = "plain"
+file = "src/GamsDeps/Ops.idr"
+carriers = ["GitPin", "DepsInc", "AbsPath"]
+operations = ["parseManifest", "resolve", "render", "emit"]
+laws = [
+  "missing checkout => resolve Nothing; do not emit empty DepsInc",
+  "render AbsPath => $setGlobal KALECKY_GAMS_SRC '<abs>/' with trailing slash",
+]
+refined = false
+notes = "plain + IO at edge: parse/resolve/render pure; emit in IO"

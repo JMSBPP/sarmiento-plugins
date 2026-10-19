@@ -5,6 +5,9 @@
 build/
 *.*~
 
+# --- GAMS generated includes / listings --------------------------------------
+src/build/
+
 # --- Editor and OS noise -----------------------------------------------------
 *~
 *.swp

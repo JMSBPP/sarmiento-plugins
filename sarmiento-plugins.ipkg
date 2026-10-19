@@ -17,12 +17,17 @@ bugtracker = "https://github.com/JMSBPP/sarmiento-plugins/issues"
 
 -- modules to install
 modules = Sarmiento_plugins
+        , GamsDeps.AbsPath
+        , GamsDeps.GitPin
+        , GamsDeps.DepsInc
+        , GamsDeps.Ops
+        , GamsDepsEmit
 
 -- main file (i.e. file to load at REPL)
--- main =
+main = GamsDepsEmit
 
 -- name of executable
--- executable =
+executable = "gams-deps-emit"
 -- opts =
 sourcedir = "src"
 -- datadir =
