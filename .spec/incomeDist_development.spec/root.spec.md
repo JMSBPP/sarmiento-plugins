@@ -1,37 +1,22 @@
 
-
-
 \[
 	\begin{aligned}
-		\texttt{IncomeDist} \\
-		\texttt{EconDevelopment} \\
-		\texttt{EconGrowth}
+		\psi (Y):\texttt{IncomeDist} \\
+		 \mathcal{D}:\texttt{EconDevelopment} \\
+		G(Y) :\texttt{EconGrowth}
 	\end{aligned}
 \]
 
+> \(\mathcal{D}\) is a placeholder for better notation for the type of econ development
+> QUESTION: Is \(\mathcal{D} =\mathcal{D} (Y)\), or \(\mathcal{D} =\mathcal{D} (\text{?})\)?
 
-- \(\texttt{IncomeDist}\): path-dependent type 
+- \(\texttt{IncomeDist}\): is a path-dependent type 
 - \(\texttt{Development}\): is a product type of \(\texttt{MarginalDecreasingCapitalProdty}\) **and** \(\texttt{TechDiffusion}\)
 
 > TODO: We need to further find the type structure of those two types to build development furrther
 - \(\texttt{MarginalDecreasingCapitalProdty}\) is a **proof/Theorem** type over \(\texttt{Path} (\texttt{CapitalPty})\)
-- \(\texttt{TechDiffusion}\) is a **measure** type over \(\texttt{Technology}, \texttt{Population}\)
 
-- \(\texttt{SubstitutionElasticity}\) is a **measure** type over \(\texttt{Capital}, \texttt{Labor}\)
 - \(\texttt{InelasticSubstitutionElasticity}\) is a **proof/Theorem** type over \(\texttt{SubstitutionElasticity}\)
-
-- \(\texttt{ProfitRate} \, \{<,>, =\} \texttt{and} (\texttt{ProfitShare}, \texttt{CapitalPty}\)) is a **proof/theorem** type over the types above: \(\texttt{KaleckyProfitDeterminationLaw}\). Note that we can define:\
-
-\[
-	\texttt{KaleckyProfitDeterminationLaw} \mapsto \texttt{Equilibrium} \mid \texttt{Disequilibrium}
-\]
-
-- \(\texttt{RealWage} \, \{<,>, =\} \texttt{and} (\texttt{WageShare}, \texttt{LaborProductivity}\)) is a **proof/theorem** type over the types above: \(\texttt{KaleckyRealWageDeterminationLaw}\). Note that we can define:\
-
-\[
-	\texttt{KaleckyRealWageDeterminationLaw} \mapsto \texttt{Equilibrium} \mid \texttt{Disequilibrium}
-\]
-
 
 
 For capitalization we have:
@@ -46,7 +31,7 @@ For capitalization we have:
 
 
 For capital accumulation we have:
-
+> This is a short run to logn run mappign as some sequence of capital saving that lead to investment demand, the ouytput space is not investmetn demand
 \[
 	\begin{aligned}
 		\texttt{CapitalAccumulation} :: \texttt{Path}(\texttt{CapitalSaving}) \mapsto \texttt{InvestmentDemand} \\
@@ -59,29 +44,11 @@ Distinct from \(\texttt{Capitalization}\) (income \(\mapsto\) present value via 
 
 
 
-
-
-\(\texttt{Horizon}: \texttt{LongRun} \mid \texttt{ShortRun}\)
-
-
-
-- \(\texttt{EconGrowth}\) via \(\texttt{GrowthEffectOfDist}(\texttt{Horizon}, \texttt{IncomeDist})\) with comparative-statics sign \(\texttt{DistGrowthSign}\) is a **proof/theorem** type over the types above: \(\texttt{SarmientoGrowthDeterminationLaw}\). Note that we can define:
-
-\[
-	\begin{aligned}
-		\texttt{GrowthEffectOfDist} :: \texttt{Horizon} \times \texttt{IncomeDist} \mapsto \texttt{EconGrowth} \\
-		\texttt{Sign}: \texttt{Positive} \mid \texttt{Negative} \mid \texttt{Zero} \\
-		\texttt{DistGrowthSign} :: \texttt{Horizon} \mapsto \texttt{Sign} \\
-		\texttt{SarmientoGrowthDeterminationLaw}:\
-			\texttt{DistGrowthSign}(\texttt{LongRun}) = \texttt{Positive},\ 
-			\texttt{DistGrowthSign}(\texttt{ShortRun}) = \texttt{Negative}
-	\end{aligned}
-\]
-
-
 Inhabitant of \(\texttt{SarmientoGrowthDeterminationLaw}\): \(\texttt{SurplusAbsorption}\).
+> SurplusAbsortoin is the sarmiento mechanism to connect income distribution and economic growth to grow on the same directrion. The process is shwoign and invesrse relation int the short run  and FIND  the long run direct relationship naming it absortion
+> From now we have stated that the mechanism is political via democracis alowwing left wing parties but we want more mechanical non political mechanims
 
-- \(\texttt{SurplusAbsorption}\): mechanism that shifts surplus from \(\texttt{CapitalSaving}\) into consumption. Example mechanisms: savings\(\to\)consumption transfers, price controls, fiscal deficits.
+
 - Judgment: \(\texttt{SurplusAbsorption} : \texttt{SarmientoGrowthDeterminationLaw}\) (conjunction \(\texttt{ShortRun} \land \texttt{LongRun}\)).
 
 \[
@@ -101,12 +68,10 @@ Inhabitant of \(\texttt{SarmientoGrowthDeterminationLaw}\): \(\texttt{SurplusAbs
 		\downarrow\texttt{IncomeDist} &\Rightarrow \uparrow\texttt{CapitalSaving} \\
 		\uparrow\texttt{CapitalSaving} &\Rightarrow \uparrow\texttt{InvestmentDemand}
 			\quad\text{via}\quad \texttt{CapitalAccumulation} \\
-		&\Rightarrow \uparrow\texttt{ProfitShare} \\
-		\uparrow\texttt{ProfitShare} &\Rightarrow \uparrow\texttt{CapitalSaving} / \uparrow\texttt{InvestmentDemand} \\
 		\uparrow\texttt{InvestmentDemand} &\Rightarrow \uparrow\texttt{EconGrowth}
 	\end{aligned}
 \]
-
+> It is the surplus absortion mechamis what allows to define a mean reversion pattern on income distributiuon 
 **LongRun.** Premises: \(\texttt{IncomeDist}\) is path-dependent / accumulated; \(\texttt{InclusivePoliticalInstitutions}\) (named premise only). Past ShortRun may lower \(\texttt{IncomeDist}\) (growth via the contrapositive chain). Thin axiom:
 
 \[
@@ -144,7 +109,7 @@ Hole \(\texttt{?longRunPositive}\): derivation from \(\texttt{IncomeDistMeanReve
 	\end{aligned}
 \]
 
-- \(\texttt{TrendCoMoveSign}(\texttt{Trend}(\texttt{BottomIncome}), \texttt{Trend}(\texttt{MeanIncome})) = \texttt{Positive}\) is a **proof/theorem** type over the types above: \(\texttt{SarmientoTrendCoMoveLaw}\). Complements non-transmission of mean **levels** into \(\texttt{IncomeDist}\): bottom and mean **trends** co-move. Note that we can define:
+- \(\texttt{TrendCoMoveSign}(\texttt{Trend}(\texttt{BottomIncome}), \texttt{Trend}(\texttt{MeanIncome})) = \texttt{Positive}\) is a **proof/theorem** type over the types above: \\(\texttt{SarmientoTrendCoMoveLaw}\). Complements non-transmission of mean **levels** into \(\texttt{IncomeDist}\): bottom and mean **trends** co-move. Note that we can define:
 
 \[
 	\begin{aligned}

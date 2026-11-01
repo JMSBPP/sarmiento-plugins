@@ -5,7 +5,7 @@ $onText
 ===============================================
 $offText
 
-$include "build/deps.inc"
+$include "gams-deps.inc"
 $if not declared Labor $include "%KALECKY_GAMS_SRC%parameters/Production.gms"
 
 Parameter TechDiffusion(Labor, Technology);
